@@ -31,13 +31,26 @@ function saveJournal(journal) {
 }
 
 // ---- Greeting ----
+const greetings = [
+  'All things shine',
+  'Notice the good',
+  'You are enough',
+  'One small joy',
+  'Let it glow',
+  'Breathe and bloom',
+  'Light is here',
+  'Something beautiful today',
+  'This moment matters',
+  'Softly, gently',
+  'The world is kind',
+  'You belong here',
+];
+
 function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 6) return 'Rest well';
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  if (h < 21) return 'Good evening';
-  return 'Good night';
+  // One greeting per day, consistent throughout the day
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  return greetings[dayOfYear % greetings.length];
 }
 
 // ---- Format date ----
