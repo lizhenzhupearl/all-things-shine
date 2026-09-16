@@ -18,6 +18,69 @@
   <div id="app">
     <!-- Global theme background -->
     <div id="app-bg"></div>
+
+    <!-- Onboarding (first visit only) -->
+    <div id="onboarding" class="onboarding hidden">
+      <div class="onboarding-pages" id="onboarding-pages">
+
+        <!-- Intro 1: The Opening -->
+        <div class="onboarding-page">
+          <div class="onboarding-content">
+            <h1 class="onboarding-title">All Things Shine</h1>
+            <div class="onboarding-text">
+              <p>In a world that moves so fast,<br>this is your quiet corner.</p>
+              <p>A place to pause,<br>to notice the small things —<br>a warm meal, a kind word,<br>flowers on the way home.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intro 2: The Heart -->
+        <div class="onboarding-page">
+          <div class="onboarding-content">
+            <div class="onboarding-heart-demo">
+              <svg viewBox="0 0 100 100" class="onboarding-heart-icon">
+                <path d="M50 88 C25 65, 2 45, 2 28 C2 14, 13 2, 28 2 C38 2, 46 8, 50 16 C54 8, 62 2, 72 2 C87 2, 98 14, 98 28 C98 45, 75 65, 50 88Z" />
+              </svg>
+            </div>
+            <div class="onboarding-text">
+              <p>Every time something good happens,<br>no matter how small,<br>press the heart.</p>
+              <div class="onboarding-examples">
+                <span class="onboarding-tag">a healthy breakfast</span>
+                <span class="onboarding-tag">bought flowers</span>
+                <span class="onboarding-tag">called a friend</span>
+                <span class="onboarding-tag">took a walk</span>
+                <span class="onboarding-tag">cooked dinner</span>
+              </div>
+              <p class="onboarding-small">One tap. One moment of gratitude.<br>Over time, these moments add up.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intro 3: The Journal -->
+        <div class="onboarding-page">
+          <div class="onboarding-content">
+            <div class="onboarding-journal-demo">
+              <div class="onboarding-journal-card">
+                <span class="onboarding-journal-date">Tuesday, September 16</span>
+                <p class="onboarding-journal-text">Today my colleague brought me coffee without asking. Such a small thing, but it made my whole morning brighter. Grateful for people who notice.</p>
+              </div>
+            </div>
+            <div class="onboarding-text">
+              <p>Some days, you'll want to say more.<br>Swipe to your gratitude journal —<br>write what made you smile.</p>
+              <p class="onboarding-small">It stays here, just for you.<br>Look back whenever you'd like.</p>
+            </div>
+            <button class="onboarding-begin" id="onboarding-begin">Begin</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="onboarding-dots" id="onboarding-dots">
+        <span class="onboarding-dot active"></span>
+        <span class="onboarding-dot"></span>
+        <span class="onboarding-dot"></span>
+      </div>
+    </div>
+
     <!-- Page Container with swipe support -->
     <div id="pages" class="pages">
 

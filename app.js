@@ -77,6 +77,62 @@ function escapeHtml(str) {
 }
 
 // =======================================
+// ONBOARDING (first visit only)
+// =======================================
+const STORAGE_KEY_ONBOARDED = 'heartbeat_onboarded';
+
+(function initOnboarding() {
+  if (localStorage.getItem(STORAGE_KEY_ONBOARDED)) return;
+
+  const overlay = document.getElementById('onboarding');
+  const pagesEl = document.getElementById('onboarding-pages');
+  const dots = document.querySelectorAll('.onboarding-dot');
+  const beginBtn = document.getElementById('onboarding-begin');
+
+  overlay.classList.remove('hidden');
+  let page = 0;
+  const total = 3;
+
+  function goTo(i) {
+    if (i < 0 || i >= total) return;
+    page = i;
+    pagesEl.style.transform = `translateX(-${i * 100}vw)`;
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+  }
+
+  // Swipe
+  let sx = 0, dx = 0;
+  overlay.addEventListener('touchstart', e => { sx = e.touches[0].clientX; dx = 0; }, { passive: true });
+  overlay.addEventListener('touchmove', e => {
+    dx = e.touches[0].clientX - sx;
+    const base = -page * window.innerWidth;
+    pagesEl.style.transition = 'none';
+    pagesEl.style.transform = `translateX(${base + dx * 0.4}px)`;
+  }, { passive: true });
+  overlay.addEventListener('touchend', () => {
+    pagesEl.style.transition = '';
+    if (dx < -60) goTo(page + 1);
+    else if (dx > 60) goTo(page - 1);
+    else goTo(page);
+  }, { passive: true });
+
+  // Keyboard
+  overlay.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goTo(page + 1);
+    if (e.key === 'ArrowLeft') goTo(page - 1);
+  });
+  overlay.setAttribute('tabindex', '0');
+  overlay.focus();
+
+  // Begin button
+  beginBtn.addEventListener('click', () => {
+    localStorage.setItem(STORAGE_KEY_ONBOARDED, '1');
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.classList.add('hidden'), 600);
+  });
+})();
+
+// =======================================
 // THEME SYSTEM
 // =======================================
 const STORAGE_KEY_THEME = 'heartbeat_theme';
