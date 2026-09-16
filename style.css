@@ -1130,3 +1130,11 @@ html, body {
   pointer-events: none;
   z-index: 0;
 }
+
+/* ---- Shining particles ---- */
+.shimmer-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}

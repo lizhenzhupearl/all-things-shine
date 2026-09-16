@@ -879,6 +879,69 @@ function showToast(msg) {
 // ---- Initialize journal page ----
 renderJournal();
 
+// =======================================
+// SHIMMER PARTICLES
+// =======================================
+(function initShimmer() {
+  const canvas = document.getElementById('shimmer-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let w, h;
+  function resize() {
+    w = canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    h = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COUNT = 25;
+  const particles = [];
+  for (let i = 0; i < COUNT; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: 1 + Math.random() * 2,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: -0.15 - Math.random() * 0.25,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.008 + Math.random() * 0.012,
+    });
+  }
+
+  function draw(t) {
+    if (currentPage !== 0) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.dx;
+      p.y += p.dy;
+      p.phase += p.speed;
+
+      // Wrap around
+      if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+
+      const glow = 0.15 + 0.35 * Math.sin(p.phase);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 240, ${glow})`;
+      ctx.fill();
+
+      // Soft glow ring
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 220, ${glow * 0.15})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
 // ---- Service Worker Registration ----
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
