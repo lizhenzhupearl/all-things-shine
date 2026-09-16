@@ -166,21 +166,26 @@ function getDailyThemeIndex() {
 }
 
 function loadThemePrefs() {
-  const mode = localStorage.getItem(STORAGE_KEY_THEME_MODE) || 'daily';
+  const mode = localStorage.getItem(STORAGE_KEY_THEME_MODE) || 'manual';
   const manual = parseInt(localStorage.getItem(STORAGE_KEY_THEME) || '0', 10);
   return { mode, manual };
 }
 
 function getActiveThemeIndex() {
   const prefs = loadThemePrefs();
-  if (prefs.mode === 'manual') return prefs.manual;
-  return getDailyThemeIndex();
+  if (prefs.mode === 'daily') return getDailyThemeIndex();
+  // Default to Ocean Sunrise (index 1) if no preference set
+  if (!localStorage.getItem(STORAGE_KEY_THEME)) return 1;
+  return prefs.manual;
 }
 
 function renderThemeBg(index) {
   const theme = themes[index];
+  // Apply to both the score-page bg and the global app bg
   const bgEl = document.getElementById('theme-bg');
+  const appBg = document.getElementById('app-bg');
   bgEl.style.background = theme.bg;
+  appBg.style.background = theme.bg;
 
   // Render decorative elements
   const existing = bgEl.querySelectorAll('.theme-decor');
