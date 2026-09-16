@@ -303,6 +303,16 @@ html, body {
   background: var(--accent-soft);
 }
 
+.total-quiet {
+  margin-top: auto;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
 .score-content {
   position: relative;
   z-index: 2;

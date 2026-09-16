@@ -438,6 +438,9 @@ function updateTodayScore() {
   const scores = loadScores();
   const entries = scores[todayKey()] || [];
   renderHeartNotes(entries);
+  // Quiet total
+  const total = Object.keys(scores).reduce((sum, k) => sum + getHeartCount(scores, k), 0);
+  document.getElementById('total-quiet').textContent = total > 0 ? `${total} moments` : '';
 }
 
 function renderHeartNotes(entries) {
