@@ -1,5 +1,5 @@
 // Service Worker for offline support
-const CACHE_NAME = 'heartbeat-v1';
+const CACHE_NAME = 'all-things-shine-v2';
 const ASSETS = [
   './',
   './index.html',
