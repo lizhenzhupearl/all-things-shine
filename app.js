@@ -401,7 +401,13 @@ let touchStartY = 0;
 let touchDeltaX = 0;
 let isSwiping = false;
 
+function isOnboardingOpen() {
+  const ob = document.getElementById('onboarding');
+  return ob && !ob.classList.contains('hidden');
+}
+
 document.addEventListener('touchstart', (e) => {
+  if (isOnboardingOpen()) { touchStartX = -9999; return; }
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
   touchDeltaX = 0;
