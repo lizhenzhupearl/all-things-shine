@@ -972,62 +972,159 @@ function showToast(msg) {
 renderJournal();
 
 // =======================================
-// SHIMMER PARTICLES
+// FLOATING GEMS
 // =======================================
-(function initShimmer() {
+(function initGems() {
   const canvas = document.getElementById('shimmer-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  let w, h;
+  const gemColors = [
+    { base: [220, 40, 60],  hi: [255, 120, 140], name: 'ruby' },
+    { base: [30, 90, 210],  hi: [120, 180, 255], name: 'sapphire' },
+    { base: [16, 160, 80],  hi: [100, 230, 150], name: 'emerald' },
+    { base: [140, 60, 200], hi: [200, 140, 255], name: 'amethyst' },
+    { base: [240, 180, 30], hi: [255, 230, 120], name: 'topaz' },
+    { base: [230, 100, 50], hi: [255, 180, 120], name: 'amber' },
+    { base: [50, 190, 210], hi: [140, 230, 245], name: 'aqua' },
+    { base: [220, 80, 180], hi: [255, 160, 220], name: 'pink sapphire' },
+  ];
+
+  // Gem shapes: 0=diamond, 1=hexagon, 2=star
+  const SHAPES = 3;
+
+  let w, h, dpr;
   function resize() {
-    w = canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
-    h = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.width = canvas.offsetWidth * dpr;
+    h = canvas.height = canvas.offsetHeight * dpr;
   }
   resize();
   window.addEventListener('resize', resize);
 
-  const COUNT = 25;
-  const particles = [];
+  const COUNT = 14;
+  const gems = [];
   for (let i = 0; i < COUNT; i++) {
-    particles.push({
+    const color = gemColors[Math.floor(Math.random() * gemColors.length)];
+    gems.push({
       x: Math.random() * w,
       y: Math.random() * h,
-      r: 1 + Math.random() * 2,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: -0.15 - Math.random() * 0.25,
+      size: (4 + Math.random() * 6) * dpr,
+      dx: (Math.random() - 0.5) * 0.2,
+      dy: -0.1 - Math.random() * 0.2,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.008,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.008 + Math.random() * 0.012,
+      twinkleSpeed: 0.01 + Math.random() * 0.015,
+      color: color,
+      shape: Math.floor(Math.random() * SHAPES),
     });
   }
 
-  function draw(t) {
+  function drawDiamond(ctx, s) {
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.lineTo(s * 0.65, 0);
+    ctx.lineTo(0, s);
+    ctx.lineTo(-s * 0.65, 0);
+    ctx.closePath();
+  }
+
+  function drawHexagon(ctx, s) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI / 3) * i - Math.PI / 6;
+      const method = i === 0 ? 'moveTo' : 'lineTo';
+      ctx[method](Math.cos(a) * s, Math.sin(a) * s);
+    }
+    ctx.closePath();
+  }
+
+  function drawStar(ctx, s) {
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = (Math.PI / 2) * i;
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a) * s, Math.sin(a) * s);
+    }
+  }
+
+  function draw() {
     if (currentPage !== 0) {
       requestAnimationFrame(draw);
       return;
     }
     ctx.clearRect(0, 0, w, h);
-    for (const p of particles) {
-      p.x += p.dx;
-      p.y += p.dy;
-      p.phase += p.speed;
 
-      // Wrap around
-      if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
-      if (p.x < -10) p.x = w + 10;
-      if (p.x > w + 10) p.x = -10;
+    for (const g of gems) {
+      g.x += g.dx;
+      g.y += g.dy;
+      g.rot += g.rotSpeed;
+      g.phase += g.twinkleSpeed;
 
-      const glow = 0.15 + 0.35 * Math.sin(p.phase);
+      if (g.y < -20) { g.y = h + 20; g.x = Math.random() * w; }
+      if (g.x < -20) g.x = w + 20;
+      if (g.x > w + 20) g.x = -20;
+
+      const twinkle = 0.3 + 0.4 * Math.sin(g.phase);
+      const [br, bg, bb] = g.color.base;
+      const [hr, hg, hb] = g.color.hi;
+
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(g.rot);
+      ctx.globalAlpha = twinkle;
+
+      // Outer glow
+      const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, g.size * 3);
+      glowGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.25)`);
+      glowGrad.addColorStop(1, `rgba(${hr},${hg},${hb}, 0)`);
+      ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 240, ${glow})`;
+      ctx.arc(0, 0, g.size * 3, 0, Math.PI * 2);
       ctx.fill();
 
-      // Soft glow ring
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 220, ${glow * 0.15})`;
-      ctx.fill();
+      // Gem body
+      if (g.shape === 0) drawDiamond(ctx, g.size);
+      else if (g.shape === 1) drawHexagon(ctx, g.size);
+
+      if (g.shape < 2) {
+        // Faceted gradient fill
+        const bodyGrad = ctx.createLinearGradient(-g.size, -g.size, g.size, g.size);
+        bodyGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.9)`);
+        bodyGrad.addColorStop(0.5, `rgba(${br},${bg},${bb}, 0.75)`);
+        bodyGrad.addColorStop(1, `rgba(${br*0.6|0},${bg*0.6|0},${bb*0.6|0}, 0.8)`);
+        ctx.fillStyle = bodyGrad;
+        ctx.fill();
+
+        // Highlight facet (top-left shine)
+        ctx.beginPath();
+        if (g.shape === 0) {
+          ctx.moveTo(0, -g.size);
+          ctx.lineTo(g.size * 0.25, -g.size * 0.15);
+          ctx.lineTo(-g.size * 0.25, -g.size * 0.15);
+          ctx.closePath();
+        } else {
+          ctx.arc(-g.size * 0.25, -g.size * 0.25, g.size * 0.35, 0, Math.PI * 2);
+        }
+        ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.3 * Math.sin(g.phase * 1.5)})`;
+        ctx.fill();
+      } else {
+        // Star sparkle
+        drawStar(ctx, g.size);
+        ctx.strokeStyle = `rgba(${hr},${hg},${hb}, 0.8)`;
+        ctx.lineWidth = 1.5 * dpr;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Center glow
+        ctx.beginPath();
+        ctx.arc(0, 0, g.size * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.3 * Math.sin(g.phase)})`;
+        ctx.fill();
+      }
+
+      ctx.restore();
     }
     requestAnimationFrame(draw);
   }
