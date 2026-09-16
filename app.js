@@ -534,6 +534,7 @@ function renderSparkline(scores) {
   ctx.arc(lastX, lastY, 2.5 * dpr, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.fill();
+}
 
 function renderHeartNotes(entries) {
   if (entries.length === 0) {
