@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#fef1f0">
+  <title>Heartbeat</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Page Container with swipe support -->
+    <div id="pages" class="pages">
+
+      <!-- PAGE 1: Daily Score -->
+      <section id="page-score" class="page page-score active">
+        <!-- Theme background layers -->
+        <div class="theme-bg" id="theme-bg"></div>
+        <div class="theme-overlay"></div>
+        <!-- Theme picker button -->
+        <button class="theme-btn" id="theme-btn" aria-label="Change theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <div class="score-content">
+          <p class="greeting" id="greeting"></p>
+          <div class="heart-container">
+            <button id="heart-btn" class="heart-btn" aria-label="Log a heart">
+              <svg viewBox="0 0 100 100" class="heart-svg">
+                <path d="M50 88 C25 65, 2 45, 2 28 C2 14, 13 2, 28 2 C38 2, 46 8, 50 16 C54 8, 62 2, 72 2 C87 2, 98 14, 98 28 C98 45, 75 65, 50 88Z" />
+              </svg>
+            </button>
+            <div class="pulse-ring" id="pulse-ring"></div>
+          </div>
+          <div class="heart-notes" id="heart-notes"></div>
+          <p class="swipe-hint">swipe left for gratitude journal</p>
+        </div>
+      </section>
+
+      <!-- PAGE 2: Gratitude Journal -->
+      <section id="page-journal" class="page page-journal">
+        <div class="journal-content">
+          <div class="journal-header">
+            <p class="journal-date" id="journal-date"></p>
+            <p class="journal-subtitle">What are you grateful for today?</p>
+          </div>
+          <div class="journal-entries" id="journal-entries">
+            <!-- Today's entry area -->
+            <div class="journal-today" id="journal-today">
+              <textarea id="journal-input" placeholder="Today I'm grateful for..." rows="5"></textarea>
+              <button id="journal-save" class="save-btn">Save</button>
+            </div>
+            <!-- Past entries loaded here -->
+            <div id="past-entries" class="past-entries"></div>
+          </div>
+        </div>
+        <p class="swipe-hint swipe-hint-journal">swipe left for insights &middot; swipe right for home</p>
+      </section>
+
+      <!-- PAGE 3: Statistics -->
+      <section id="page-stats" class="page page-stats">
+        <div class="stats-content">
+          <h2 class="stats-title">Your Journey</h2>
+          <div class="stats-grid">
+            <div class="stat-card" id="card-today" data-card="today">
+              <span class="stat-number" id="stat-today-score">0</span>
+              <span class="stat-label">Today's Hearts</span>
+            </div>
+            <div class="stat-card" id="card-total" data-card="total">
+              <span class="stat-number" id="stat-total-score">0</span>
+              <span class="stat-label">Total Hearts</span>
+            </div>
+            <div class="stat-card" id="card-streak" data-card="streak">
+              <span class="stat-number" id="stat-streak">0</span>
+              <span class="stat-label">Day Streak</span>
+            </div>
+            <div class="stat-card" id="card-journal" data-card="journal">
+              <span class="stat-number" id="stat-journal-count">0</span>
+              <span class="stat-label">Journal Entries</span>
+            </div>
+          </div>
+          <div class="stat-detail" id="stat-detail"></div>
+          <div class="chart-section">
+            <h3 class="chart-title">Last 14 Days</h3>
+            <div class="chart-container" id="chart-container"></div>
+          </div>
+          <div class="recent-gratitudes">
+            <h3 class="chart-title">Recent Gratitudes</h3>
+            <div id="recent-gratitudes-list" class="gratitudes-list"></div>
+          </div>
+        </div>
+        <p class="swipe-hint">swipe right to go back</p>
+      </section>
+
+    </div>
+
+    <!-- Theme picker panel -->
+    <div class="theme-picker-overlay" id="theme-picker-overlay">
+      <div class="theme-picker" id="theme-picker">
+        <div class="theme-picker-header">
+          <span>Choose your mood</span>
+          <button class="theme-picker-close" id="theme-picker-close">&times;</button>
+        </div>
+        <div class="theme-picker-grid" id="theme-picker-grid"></div>
+        <button class="theme-picker-random" id="theme-picker-random">Daily surprise</button>
+      </div>
+    </div>
+
+    <!-- Page dots indicator -->
+    <div class="page-dots">
+      <span class="dot active" data-page="0"></span>
+      <span class="dot" data-page="1"></span>
+      <span class="dot" data-page="2"></span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
