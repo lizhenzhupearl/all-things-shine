@@ -1,5 +1,5 @@
 /* ========================================
-   Heartbeat — App Logic
+   万物闪耀 · All Things Shine — App Logic
    ======================================== */
 
 // ---- Storage helpers ----

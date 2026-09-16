@@ -1,7 +1,7 @@
 {
-  "name": "Heartbeat",
-  "short_name": "Heartbeat",
-  "description": "A gentle daily wellness companion",
+  "name": "万物闪耀 · All Things Shine",
+  "short_name": "万物闪耀",
+  "description": "A gentle daily wellness companion — 万物闪耀",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fef6f3",
