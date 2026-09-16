@@ -354,6 +354,16 @@ function initThemePicker() {
     applyTheme(getDailyThemeIndex());
     overlay.classList.remove('open');
   });
+
+  // Show intro again
+  document.getElementById('theme-picker-about').addEventListener('click', () => {
+    overlay.classList.remove('open');
+    const ob = document.getElementById('onboarding');
+    const pagesEl = document.getElementById('onboarding-pages');
+    ob.classList.remove('hidden', 'fade-out');
+    pagesEl.style.transform = 'translateX(0)';
+    document.querySelectorAll('.onboarding-dot').forEach((d, i) => d.classList.toggle('active', i === 0));
+  });
 }
 
 // Initialize theme
