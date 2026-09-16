@@ -441,7 +441,99 @@ function updateTodayScore() {
   // Quiet total
   const total = Object.keys(scores).reduce((sum, k) => sum + getHeartCount(scores, k), 0);
   document.getElementById('total-quiet').textContent = total > 0 ? `${total} moments` : '';
+  // Sparkline
+  renderSparkline(scores);
 }
+
+function renderSparkline(scores) {
+  const canvas = document.getElementById('sparkline');
+  const wrap = document.getElementById('sparkline-wrap');
+  if (!canvas) return;
+
+  // Build cumulative data: last 30 days
+  const days = [];
+  const d = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const dd = new Date(d);
+    dd.setDate(dd.getDate() - i);
+    days.push(dd.toISOString().slice(0, 10));
+  }
+
+  let cum = 0;
+  // Count all hearts before the 30-day window
+  const allKeys = Object.keys(scores).sort();
+  for (const k of allKeys) {
+    if (k < days[0]) cum += getHeartCount(scores, k);
+  }
+
+  const points = [];
+  for (const day of days) {
+    cum += getHeartCount(scores, day);
+    points.push(cum);
+  }
+
+  // Hide if no data
+  if (cum === 0) {
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth * dpr;
+  const h = canvas.offsetHeight * dpr;
+  canvas.width = w;
+  canvas.height = h;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = max - min || 1;
+  const padY = h * 0.15;
+
+  function px(i) {
+    return (i / (points.length - 1)) * w;
+  }
+  function py(v) {
+    return padY + (1 - (v - min) / range) * (h - padY * 2);
+  }
+
+  // Fill gradient under the line
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(255,255,255,0.25)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(points[0]));
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(px(i), py(points[i]));
+  }
+  ctx.lineTo(px(points.length - 1), h);
+  ctx.lineTo(px(0), h);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(points[0]));
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(px(i), py(points[i]));
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 1.5 * dpr;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // End dot
+  const lastX = px(points.length - 1);
+  const lastY = py(points[points.length - 1]);
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 2.5 * dpr, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fill();
 
 function renderHeartNotes(entries) {
   if (entries.length === 0) {
