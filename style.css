@@ -85,8 +85,23 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   z-index: 100;
+}
+
+.swipe-label {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dots-row {
+  display: flex;
+  gap: 10px;
 }
 
 .dot {
