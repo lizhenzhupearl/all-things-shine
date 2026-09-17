@@ -1234,14 +1234,10 @@ html, body {
   animation: onboarding-pulse 2s ease-in-out infinite;
 }
 
-.onboarding-heart-icon {
+.onboarding-heart-canvas {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 4px 20px rgba(232, 115, 107, 0.5));
-}
-
-.onboarding-heart-icon path {
-  fill: var(--heart-color);
+  display: block;
 }
 
 @keyframes onboarding-pulse {

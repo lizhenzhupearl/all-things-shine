@@ -760,13 +760,13 @@ setInterval(updateGreeting, 60000);
 // =======================================
 // CROWN JEWEL HEART — Canvas Rendering
 // =======================================
-(function initCrownHeart() {
-  const canvas = document.getElementById('heart-gem-canvas');
+function initCrownJewelHeart(canvasId, cssSize) {
+  const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
   const dpr = window.devicePixelRatio || 1;
-  const cssSize = 120;
+  cssSize = cssSize || 120;
   canvas.width = cssSize * dpr;
   canvas.height = cssSize * dpr;
   const w = canvas.width, h = canvas.height;
@@ -944,7 +944,10 @@ setInterval(updateGreeting, 60000);
     requestAnimationFrame(draw);
   }
   draw();
-})();
+}
+
+initCrownJewelHeart('heart-gem-canvas', 120);
+initCrownJewelHeart('onboarding-heart-canvas', 70);
 
 // =======================================
 // PAGE 2 — GRATITUDE JOURNAL
