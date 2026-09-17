@@ -1326,6 +1326,16 @@ renderJournal();
       requestAnimationFrame(draw);
       return;
     }
+
+    // Mobile safety: re-check dimensions if canvas was 0 at init
+    if (w === 0 || h === 0) {
+      resize();
+      for (const g of gems) {
+        g.x = Math.random() * w;
+        g.y = Math.random() * h;
+      }
+    }
+
     ctx.clearRect(0, 0, w, h);
 
     for (const g of gems) {
@@ -1794,6 +1804,12 @@ renderJournal();
       requestAnimationFrame(draw);
       return;
     }
+
+    // Mobile safety: re-check dimensions if canvas was 0 at init
+    if (w === 0 || h === 0) {
+      resize();
+    }
+
     ctx.clearRect(0, 0, w, h);
 
     // Draw the frame structure
