@@ -128,8 +128,65 @@ const STORAGE_KEY_ONBOARDED = 'heartbeat_onboarded';
   beginBtn.addEventListener('click', () => {
     localStorage.setItem(STORAGE_KEY_ONBOARDED, '1');
     overlay.classList.add('fade-out');
-    setTimeout(() => overlay.classList.add('hidden'), 600);
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+      cancelAnimationFrame(obBgRaf);
+    }, 600);
   });
+
+  // Aurora Sky background for onboarding
+  const obCanvas = document.getElementById('onboarding-bg');
+  const obCtx = obCanvas.getContext('2d');
+  const obDpr = window.devicePixelRatio || 1;
+  obCanvas.width = window.innerWidth * obDpr;
+  obCanvas.height = window.innerHeight * obDpr;
+  let obBgRaf = 0;
+  const obT0 = performance.now();
+
+  function drawAuroraSky(ctx, w, h, t) {
+    const bg = ctx.createLinearGradient(0,0,0,h);
+    bg.addColorStop(0,'#050510'); bg.addColorStop(0.3,'#0a0a25');
+    bg.addColorStop(0.6,'#0d1520'); bg.addColorStop(1,'#080812');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+    const bands = [
+      {y:.25,c:[50,220,120],sp:.12},{y:.35,c:[30,180,200],sp:.1},
+      {y:.3,c:[100,60,220],sp:.08},{y:.2,c:[50,255,150],sp:.15},
+    ];
+    for (const b of bands) {
+      ctx.beginPath(); ctx.moveTo(0,h);
+      for (let x=0; x<=w; x+=3) {
+        const wave = Math.sin(x*0.01+t*0.4+b.y*10)*h*0.08 + Math.sin(x*0.005+t*0.2+b.c[0]*0.1)*h*0.05;
+        ctx.lineTo(x, b.y*h+wave);
+      }
+      ctx.lineTo(w,h); ctx.closePath();
+      const ag = ctx.createLinearGradient(0,(b.y-b.sp)*h,0,(b.y+b.sp)*h);
+      const a = 0.08+0.04*Math.sin(t*0.3+b.y*5);
+      ag.addColorStop(0,`rgba(${b.c},0)`); ag.addColorStop(0.3,`rgba(${b.c},${a})`);
+      ag.addColorStop(0.7,`rgba(${b.c},${a*0.5})`); ag.addColorStop(1,`rgba(${b.c},0)`);
+      ctx.fillStyle = ag; ctx.fill();
+    }
+    function sr(i) { let x=Math.sin(42+i*127.1)*43758.5453; return x-Math.floor(x); }
+    for (let i=0; i<80; i++) {
+      const sx=sr(i)*w, sy=sr(i+1000)*h*0.6, sz=0.3+sr(i+2000)*0.8;
+      const tw=0.3+0.5*(0.5+0.5*Math.sin(t+i*1.7));
+      ctx.fillStyle=`rgba(255,255,255,${tw})`; ctx.beginPath(); ctx.arc(sx,sy,sz,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function obLoop() {
+    const t = (performance.now() - obT0) / 1000;
+    drawAuroraSky(obCtx, obCanvas.width, obCanvas.height, t);
+    obBgRaf = requestAnimationFrame(obLoop);
+  }
+  obBgRaf = requestAnimationFrame(obLoop);
+
+  // Expose for "Read intro again" button
+  window._startOnboardingBg = () => {
+    obCanvas.width = window.innerWidth * obDpr;
+    obCanvas.height = window.innerHeight * obDpr;
+    cancelAnimationFrame(obBgRaf);
+    obBgRaf = requestAnimationFrame(obLoop);
+  };
 })();
 
 // =======================================
@@ -643,6 +700,8 @@ function initThemePicker() {
     ob.classList.remove('hidden', 'fade-out');
     pagesEl.style.transform = 'translateX(0)';
     document.querySelectorAll('.onboarding-dot').forEach((d, i) => d.classList.toggle('active', i === 0));
+    // Restart Aurora Sky background
+    if (window._startOnboardingBg) window._startOnboardingBg();
   });
 }
 

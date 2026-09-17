@@ -1207,8 +1207,16 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 900;
-  background: linear-gradient(160deg, #1e293b 0%, #0f172a 40%, #1e3a5f 100%);
+  background: transparent;
   transition: opacity 0.6s ease;
+}
+
+.onboarding-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 .onboarding.hidden {
@@ -1221,6 +1229,8 @@ html, body {
 }
 
 .onboarding-pages {
+  position: relative;
+  z-index: 1;
   display: flex;
   height: 100%;
   transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
