@@ -484,25 +484,10 @@ const themes = [
   },
 ];
 
-function getDailyThemeIndex() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((now - start) / 86400000);
-  return dayOfYear % themes.length;
-}
-
-function loadThemePrefs() {
-  const mode = localStorage.getItem(STORAGE_KEY_THEME_MODE) || 'manual';
-  const manual = parseInt(localStorage.getItem(STORAGE_KEY_THEME) || '0', 10);
-  return { mode, manual };
-}
-
 function getActiveThemeIndex() {
-  const prefs = loadThemePrefs();
-  if (prefs.mode === 'daily') return getDailyThemeIndex();
   // Default to Warm Sunset (index 8) if no preference set
   if (!localStorage.getItem(STORAGE_KEY_THEME)) return 8;
-  return prefs.manual;
+  return parseInt(localStorage.getItem(STORAGE_KEY_THEME) || '8', 10);
 }
 
 function renderThemeBg(index) {
@@ -637,8 +622,6 @@ function initThemePicker() {
   const grid = document.getElementById('theme-picker-grid');
   const closeBtn = document.getElementById('theme-picker-close');
   const themeBtn = document.getElementById('theme-btn');
-  const randomBtn = document.getElementById('theme-picker-random');
-
   // Render swatches
   let swatchHtml = '';
   for (let i = 0; i < themes.length; i++) {
@@ -672,17 +655,6 @@ function initThemePicker() {
     localStorage.setItem(STORAGE_KEY_THEME, idx.toString());
     localStorage.setItem(STORAGE_KEY_THEME_MODE, 'manual');
     applyTheme(idx);
-    overlay.classList.remove('open');
-  });
-
-  // Daily surprise mode — pick a random theme different from current
-  randomBtn.addEventListener('click', () => {
-    const current = getActiveThemeIndex();
-    let pick;
-    do { pick = Math.floor(Math.random() * themes.length); } while (pick === current && themes.length > 1);
-    localStorage.setItem(STORAGE_KEY_THEME, pick.toString());
-    localStorage.setItem(STORAGE_KEY_THEME_MODE, 'manual');
-    applyTheme(pick);
     overlay.classList.remove('open');
   });
 
