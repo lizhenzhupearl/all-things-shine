@@ -383,6 +383,14 @@ html, body {
   height: 180px;
 }
 
+.heart-hint {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  margin-top: -8px;
+  letter-spacing: 0.03em;
+}
+
 .heart-btn {
   background: none;
   border: none;
