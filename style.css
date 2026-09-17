@@ -859,6 +859,23 @@ html, body {
   font-weight: 700;
   color: #2d3a4a;
   margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.title-gem {
+  width: 22px;
+  height: 22px;
+  color: #c0a040;
+  animation: gem-shine 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 3px rgba(220,190,80,0.4));
+}
+
+@keyframes gem-shine {
+  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(220,190,80,0.3)); transform: scale(1); }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,230,120,0.7)); transform: scale(1.1); }
   letter-spacing: 0.01em;
 }
 
