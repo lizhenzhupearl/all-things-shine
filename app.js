@@ -909,14 +909,16 @@ const dots = document.querySelectorAll('.dot');
 
 function goToPage(index) {
   if (index < 0 || index >= totalPages) return;
+  const prevPage = currentPage;
   currentPage = index;
   pagesEl.style.transform = `translateX(-${index * 100}vw)`;
   dots.forEach((d, i) => d.classList.toggle('active', i === index));
 
-  // Refresh stats when navigating to stats page
-  if (index === 2) renderStats();
-  // Refresh journal when navigating to journal page
-  if (index === 1) renderJournal();
+  // Only refresh when actually navigating TO a page (not snapping back to same page)
+  if (index !== prevPage) {
+    if (index === 2) renderStats();
+    if (index === 1) renderJournal();
+  }
 }
 
 // Dot click navigation
