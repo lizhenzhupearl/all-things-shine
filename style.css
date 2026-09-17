@@ -1343,24 +1343,24 @@ html, body {
   transform: scale(1.3);
 }
 
-/* ---- Floating gems (between overlay and jeweled frame) ---- */
+/* ---- Floating gems (above content, below frame) ---- */
 .floating-gems-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-  z-index: 2;
+  z-index: 5;
   pointer-events: none;
 }
 
-/* ---- Jeweled frame ---- */
+/* ---- Jeweled frame (topmost decorative layer) ---- */
 .shimmer-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-  z-index: 3;
+  z-index: 6;
   pointer-events: none;
 }
