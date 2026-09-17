@@ -570,6 +570,7 @@ function stopAnimatedBg() {
   _animBgDraw = null;
   const c = document.getElementById('animated-bg');
   if (c) c.style.display = 'none';
+  document.getElementById('app').classList.remove('animated-bg-active');
 }
 
 function startAnimatedBg(drawFn) {
@@ -577,6 +578,7 @@ function startAnimatedBg(drawFn) {
   const canvas = document.getElementById('animated-bg');
   if (!canvas) return;
   canvas.style.display = 'block';
+  document.getElementById('app').classList.add('animated-bg-active');
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
@@ -613,8 +615,12 @@ function applyTheme(index) {
 
   const theme = themes[index];
   if (theme && theme.canvasDraw) {
-    // Animated canvas background
-    renderThemeBg(index); // set fallback CSS gradient
+    // Animated canvas background — hide the CSS layers so they don't cover the canvas
+    const bgEl = document.getElementById('theme-bg');
+    const appBg = document.getElementById('app-bg');
+    bgEl.style.background = 'transparent';
+    appBg.style.background = 'transparent';
+    bgEl.querySelectorAll('.theme-decor').forEach(el => el.remove());
     startAnimatedBg(theme.canvasDraw);
   } else {
     stopAnimatedBg();

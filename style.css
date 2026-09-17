@@ -153,6 +153,12 @@ html, body {
   z-index: 1;
   background: radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.4) 100%);
   pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* Reduce overlays when animated canvas bg is active */
+.animated-bg-active .theme-overlay {
+  opacity: 0.15;
 }
 
 /* Theme picker button */
@@ -700,6 +706,14 @@ html, body {
   -webkit-backdrop-filter: blur(30px) saturate(1.4);
   backdrop-filter: blur(30px) saturate(1.4);
   z-index: 0;
+  transition: opacity 0.5s ease;
+}
+
+.animated-bg-active .page-journal::before,
+.animated-bg-active .page-stats::before {
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
 }
 
 .journal-content,
