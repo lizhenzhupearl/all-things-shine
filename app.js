@@ -758,6 +758,195 @@ updateTodayScore();
 setInterval(updateGreeting, 60000);
 
 // =======================================
+// CROWN JEWEL HEART — Canvas Rendering
+// =======================================
+(function initCrownHeart() {
+  const canvas = document.getElementById('heart-gem-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssSize = 120;
+  canvas.width = cssSize * dpr;
+  canvas.height = cssSize * dpr;
+  const w = canvas.width, h = canvas.height;
+  const cx = w / 2, cy = h / 2;
+  const innerSize = w * 0.6;
+  const outerSize = w * 0.69;
+
+  function makeHeartPath(size) {
+    const p = new Path2D();
+    const s = size / 100;
+    function hx(x) { return cx + (x - 50) * s; }
+    function hy(y) { return cy + (y - 50) * s; }
+    p.moveTo(hx(50), hy(88));
+    p.bezierCurveTo(hx(25), hy(65), hx(2), hy(45), hx(2), hy(28));
+    p.bezierCurveTo(hx(2), hy(14), hx(13), hy(2), hx(28), hy(2));
+    p.bezierCurveTo(hx(38), hy(2), hx(46), hy(8), hx(50), hy(16));
+    p.bezierCurveTo(hx(54), hy(8), hx(62), hy(2), hx(72), hy(2));
+    p.bezierCurveTo(hx(87), hy(2), hx(98), hy(14), hx(98), hy(28));
+    p.bezierCurveTo(hx(98), hy(45), hx(75), hy(65), hx(50), hy(88));
+    p.closePath();
+    return p;
+  }
+
+  const innerHeart = makeHeartPath(innerSize);
+  const outerHeart = makeHeartPath(outerSize);
+  let phase = 0;
+
+  function draw() {
+    phase += 0.015;
+    ctx.clearRect(0, 0, w, h);
+
+    // Shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(160,20,40,0.4)';
+    ctx.shadowBlur = 15 * dpr;
+    ctx.shadowOffsetY = 3 * dpr;
+    ctx.fillStyle = 'rgba(0,0,0,0.01)';
+    ctx.fill(outerHeart);
+    ctx.restore();
+
+    // Gold bezel
+    ctx.save();
+    ctx.clip(outerHeart);
+    const goldGrad = ctx.createLinearGradient(0, 0, w, h);
+    goldGrad.addColorStop(0, '#ffe8a0');
+    goldGrad.addColorStop(0.2, '#f0d060');
+    goldGrad.addColorStop(0.45, '#b49530');
+    goldGrad.addColorStop(0.55, '#d4b040');
+    goldGrad.addColorStop(0.8, '#f0d060');
+    goldGrad.addColorStop(1, '#8a6a10');
+    ctx.fillStyle = goldGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Bezel texture lines
+    for (let i = 0; i < 24; i++) {
+      const a = (Math.PI * 2 / 24) * i;
+      const ir = outerSize * 0.0042 * w * 0.1;
+      const or_ = outerSize * 0.005 * w * 0.1;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * outerSize * 0.42, cy + Math.sin(a) * outerSize * 0.42);
+      ctx.lineTo(cx + Math.cos(a) * outerSize * 0.5, cy + Math.sin(a) * outerSize * 0.5);
+      ctx.strokeStyle = 'rgba(255,240,180,0.15)';
+      ctx.lineWidth = 0.8 * dpr;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Cut inner heart from bezel
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill(innerHeart);
+    ctx.restore();
+
+    // Bezel edge highlights
+    ctx.strokeStyle = `rgba(255,240,180,${0.5 + 0.15 * Math.sin(phase * 0.5)})`;
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.stroke(innerHeart);
+    ctx.strokeStyle = 'rgba(90,68,12,0.5)';
+    ctx.lineWidth = 1 * dpr;
+    ctx.stroke(outerHeart);
+
+    // Gold granulation dots
+    for (let i = 0; i < 20; i++) {
+      const a = (Math.PI * 2 / 20) * i;
+      const r = outerSize * 0.52 + 4 * dpr;
+      const dx = cx + Math.cos(a) * r;
+      const dy = cy + Math.sin(a) * r - 3 * dpr;
+      ctx.beginPath();
+      ctx.arc(dx, dy, 2 * dpr, 0, Math.PI * 2);
+      const dg = ctx.createRadialGradient(dx - dpr, dy - dpr, 0, dx, dy, 2 * dpr);
+      dg.addColorStop(0, '#ffe8a0');
+      dg.addColorStop(1, '#b49530');
+      ctx.fillStyle = dg;
+      ctx.fill();
+    }
+
+    // Ruby fill
+    ctx.save();
+    ctx.clip(innerHeart);
+
+    const grad = ctx.createRadialGradient(cx - w * 0.06, cy - h * 0.08, w * 0.02, cx, cy, innerSize * 0.52);
+    grad.addColorStop(0, 'rgba(255,140,160,1)');
+    grad.addColorStop(0.25, 'rgba(230,55,75,0.95)');
+    grad.addColorStop(0.55, 'rgba(180,30,50,0.9)');
+    grad.addColorStop(0.8, 'rgba(120,15,30,0.95)');
+    grad.addColorStop(1, 'rgba(70,5,15,1)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Facets
+    const fn = 14;
+    for (let i = 0; i < fn; i++) {
+      const a0 = (Math.PI * 2 / fn) * i;
+      const a1 = (Math.PI * 2 / fn) * (i + 1);
+      const aMid = (a0 + a1) / 2;
+      const ir = innerSize * 0.17, or_ = innerSize * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a0) * ir, cy + Math.sin(a0) * ir);
+      ctx.lineTo(cx + Math.cos(aMid) * or_, cy + Math.sin(aMid) * or_);
+      ctx.lineTo(cx + Math.cos(a1) * ir, cy + Math.sin(a1) * ir);
+      ctx.closePath();
+      const b = 0.04 + 0.1 * Math.sin(phase * 1.3 + i * 0.8);
+      ctx.fillStyle = `rgba(255,255,255,${b})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${b * 0.5})`;
+      ctx.lineWidth = 0.6 * dpr;
+      ctx.stroke();
+    }
+
+    // Primary specular highlight
+    const hlX = cx - w * 0.07 + Math.cos(phase * 0.35) * w * 0.025;
+    const hlY = cy - h * 0.09 + Math.sin(phase * 0.35) * h * 0.015;
+    const hl = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, innerSize * 0.22);
+    hl.addColorStop(0, `rgba(255,255,255,${0.85 + 0.15 * Math.sin(phase * 1.5)})`);
+    hl.addColorStop(0.25, 'rgba(255,255,255,0.3)');
+    hl.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+    hl.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hl;
+    ctx.fillRect(0, 0, w, h);
+
+    // Secondary highlight
+    const hl2 = ctx.createRadialGradient(cx + w * 0.06, cy + h * 0.07, 0, cx + w * 0.06, cy + h * 0.07, innerSize * 0.1);
+    hl2.addColorStop(0, `rgba(255,255,255,${0.3 + 0.1 * Math.sin(phase * 2)})`);
+    hl2.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hl2;
+    ctx.fillRect(0, 0, w, h);
+
+    // Rainbow fire
+    const fp = Math.sin(phase * 2.5);
+    if (fp > 0.2) {
+      const colors = [[255,100,100],[255,200,80],[100,255,180],[100,160,255],[200,120,255]];
+      const fc = colors[Math.floor(phase * 0.5) % colors.length];
+      const intensity = (fp - 0.2) / 0.8;
+      const fa = phase * 0.7;
+      const fx = cx + Math.cos(fa) * innerSize * 0.15;
+      const fy = cy + Math.sin(fa) * innerSize * 0.15;
+      const fg = ctx.createRadialGradient(fx, fy, 0, fx, fy, innerSize * 0.25);
+      fg.addColorStop(0, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.22 * intensity})`);
+      fg.addColorStop(0.5, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.06 * intensity})`);
+      fg.addColorStop(1, `rgba(${fc[0]},${fc[1]},${fc[2]},0)`);
+      ctx.fillStyle = fg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Edge depth
+    const edg = ctx.createRadialGradient(cx, cy, innerSize * 0.25, cx, cy, innerSize * 0.52);
+    edg.addColorStop(0, 'rgba(0,0,0,0)');
+    edg.addColorStop(0.65, 'rgba(0,0,0,0)');
+    edg.addColorStop(1, 'rgba(0,0,0,0.3)');
+    ctx.fillStyle = edg;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.restore();
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =======================================
 // PAGE 2 — GRATITUDE JOURNAL
 // =======================================
 const journalDateEl = document.getElementById('journal-date');
