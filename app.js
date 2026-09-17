@@ -1258,8 +1258,8 @@ renderJournal();
 // =======================================
 // FLOATING GEMS — Dynamic Background Layer
 // =======================================
-(function initFloatingGems() {
-  const canvas = document.getElementById('floating-gems-canvas');
+function initFloatingGems(canvasId, pageIndex) {
+  const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
@@ -1511,7 +1511,7 @@ renderJournal();
   }
 
   function draw() {
-    if (currentPage !== 0) {
+    if (currentPage !== pageIndex) {
       requestAnimationFrame(draw);
       return;
     }
@@ -1542,7 +1542,12 @@ renderJournal();
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
-})();
+}
+
+// Initialize floating gems on all three pages
+initFloatingGems('floating-gems-canvas', 0);
+initFloatingGems('floating-gems-canvas-2', 1);
+initFloatingGems('floating-gems-canvas-3', 2);
 
 // =======================================
 // JEWELED FRAME — Gems Embedded Like a Reliquary
