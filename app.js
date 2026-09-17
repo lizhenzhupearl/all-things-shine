@@ -1504,24 +1504,29 @@ const journalSaveBtn = document.getElementById('journal-save');
 const pastEntriesEl = document.getElementById('past-entries');
 
 // Migrate old journal format (single entry per day) to array format
-function migrateJournal() {
+(function migrateJournal() {
   const journal = loadJournal();
   let changed = false;
   for (const key of Object.keys(journal)) {
-    if (journal[key] && !Array.isArray(journal[key]) && journal[key].text) {
-      journal[key] = [{ text: journal[key].text, savedAt: journal[key].savedAt }];
+    const val = journal[key];
+    if (val && !Array.isArray(val)) {
+      // Old format: {text: "...", savedAt: "..."}
+      if (val.text) {
+        journal[key] = [{ text: val.text, savedAt: val.savedAt || '' }];
+      } else {
+        delete journal[key]; // empty entry, remove
+      }
       changed = true;
     }
   }
   if (changed) saveJournal(journal);
-}
-migrateJournal();
+})();
 
 // Helper: get all entries for a day (always returns array)
 function getJournalEntries(journal, day) {
   const e = journal[day];
   if (!e) return [];
-  if (Array.isArray(e)) return e;
+  if (Array.isArray(e)) return e.filter(item => item && item.text);
   if (e.text) return [e]; // legacy fallback
   return [];
 }
@@ -1588,14 +1593,25 @@ function saveJournalEntry() {
   const text = journalInput.value.trim();
   if (!text) return;
 
-  const journal = loadJournal();
-  const today = todayKey();
-  if (!Array.isArray(journal[today])) journal[today] = [];
-  journal[today].push({
-    text: text,
-    savedAt: new Date().toISOString()
-  });
-  saveJournal(journal);
+  try {
+    const journal = loadJournal();
+    const today = todayKey();
+    // Ensure array format
+    const existing = journal[today];
+    if (!Array.isArray(existing)) {
+      journal[today] = existing && existing.text ? [existing] : [];
+    }
+    journal[today].push({
+      text: text,
+      savedAt: new Date().toISOString()
+    });
+    saveJournal(journal);
+  } catch (e) {
+    // If anything goes wrong, start fresh for today
+    const journal = loadJournal();
+    journal[todayKey()] = [{ text: text, savedAt: new Date().toISOString() }];
+    saveJournal(journal);
+  }
 
   // Clear input for next entry
   journalInput.value = '';
