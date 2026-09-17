@@ -1067,6 +1067,285 @@ function showToast(msg) {
 renderJournal();
 
 // =======================================
+// FLOATING GEMS — Dynamic Background Layer
+// =======================================
+(function initFloatingGems() {
+  const canvas = document.getElementById('floating-gems-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const gemColors = [
+    { base: [100, 210, 190], hi: [180, 245, 230], mid: [60, 180, 160], dark: [30, 120, 100] },
+    { base: [210, 200, 220], hi: [240, 235, 255], mid: [190, 180, 210], dark: [140, 130, 170] },
+    { base: [180, 130, 210], hi: [220, 185, 255], mid: [150, 100, 190], dark: [100, 60, 150] },
+    { base: [220, 120, 160], hi: [255, 180, 210], mid: [200, 90, 140], dark: [150, 50, 100] },
+    { base: [140, 200, 160], hi: [200, 240, 210], mid: [100, 175, 130], dark: [60, 130, 80] },
+    { base: [200, 80, 80],   hi: [255, 140, 140], mid: [180, 50, 60],  dark: [130, 20, 30] },
+    { base: [80, 140, 220],  hi: [150, 200, 255], mid: [50, 110, 200], dark: [20, 70, 160] },
+    { base: [240, 200, 100], hi: [255, 235, 170], mid: [220, 175, 60], dark: [180, 140, 20] },
+  ];
+
+  const fireColors = [
+    [255, 100, 100], [255, 180, 80], [255, 255, 100],
+    [100, 255, 150], [100, 180, 255], [180, 120, 255],
+  ];
+
+  const shapeTypes = ['round', 'round', 'emerald', 'pear', 'oval', 'marquise'];
+
+  let w, h, dpr;
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.width = canvas.offsetWidth * dpr;
+    h = canvas.height = canvas.offsetHeight * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COUNT = 10;
+  const gems = [];
+  for (let i = 0; i < COUNT; i++) {
+    gems.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: (10 + Math.random() * 12) * dpr,
+      dx: (Math.random() - 0.5) * 0.15,
+      dy: -0.08 - Math.random() * 0.12,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.003,
+      phase: Math.random() * Math.PI * 2,
+      twinkleSpeed: 0.008 + Math.random() * 0.012,
+      color: gemColors[Math.floor(Math.random() * gemColors.length)],
+      shape: shapeTypes[Math.floor(Math.random() * shapeTypes.length)],
+      highlightOffset: Math.random() * Math.PI * 2,
+      fireIdx: Math.floor(Math.random() * fireColors.length),
+    });
+  }
+
+  // --- Shape clip paths ---
+  function clipShape(shape, s) {
+    ctx.beginPath();
+    if (shape === 'round') {
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+    } else if (shape === 'oval') {
+      ctx.ellipse(0, 0, s, s * 0.68, 0, 0, Math.PI * 2);
+    } else if (shape === 'emerald') {
+      const ew = s * 0.75, eh = s, c = s * 0.22;
+      ctx.moveTo(-ew + c, -eh); ctx.lineTo(ew - c, -eh);
+      ctx.lineTo(ew, -eh + c);  ctx.lineTo(ew, eh - c);
+      ctx.lineTo(ew - c, eh);   ctx.lineTo(-ew + c, eh);
+      ctx.lineTo(-ew, eh - c);  ctx.lineTo(-ew, -eh + c);
+      ctx.closePath();
+    } else if (shape === 'pear') {
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s * 0.55, -s * 0.5, s * 0.85, s * 0.1, s * 0.68, s * 0.55);
+      ctx.bezierCurveTo(s * 0.52, s * 0.88, s * 0.2, s, 0, s);
+      ctx.bezierCurveTo(-s * 0.2, s, -s * 0.52, s * 0.88, -s * 0.68, s * 0.55);
+      ctx.bezierCurveTo(-s * 0.85, s * 0.1, -s * 0.55, -s * 0.5, 0, -s);
+      ctx.closePath();
+    } else if (shape === 'marquise') {
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s * 0.85, -s * 0.55, s * 0.85, s * 0.55, 0, s);
+      ctx.bezierCurveTo(-s * 0.85, s * 0.55, -s * 0.85, -s * 0.55, 0, -s);
+      ctx.closePath();
+    }
+  }
+
+  function drawFacetPath(pts) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+  }
+
+  // --- Facets per shape ---
+  function drawBrilliantFacets(shape, s, phase) {
+    const n = 10;
+    const step = (Math.PI * 2) / n;
+
+    // Adaptive radius function per shape
+    function outerR(a) {
+      if (shape === 'oval') return { x: Math.cos(a) * s, y: Math.sin(a) * s * 0.68 };
+      if (shape === 'marquise') {
+        const r = s * (0.5 + 0.5 * Math.abs(Math.sin(a)));
+        return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+      }
+      if (shape === 'pear') {
+        const r = s * (0.65 + 0.35 * Math.sin(a + Math.PI * 0.5 + 0.2));
+        return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+      }
+      // round / default
+      return { x: Math.cos(a) * s, y: Math.sin(a) * s };
+    }
+    function tableR(a) {
+      const o = outerR(a);
+      return { x: o.x * 0.38, y: o.y * 0.38 };
+    }
+
+    for (let i = 0; i < n; i++) {
+      const a0 = step * i, a1 = step * (i + 1), aMid = (a0 + a1) / 2;
+      const t0 = tableR(a0), t1 = tableR(a1), oM = outerR(aMid);
+
+      // Crown kite
+      drawFacetPath([[t0.x, t0.y], [oM.x, oM.y], [t1.x, t1.y]]);
+      const b = 0.06 + 0.12 * Math.sin(phase * 1.2 + a0 * 2);
+      ctx.fillStyle = `rgba(255,255,255,${b})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${0.05 + b * 0.3})`;
+      ctx.lineWidth = 0.4 * dpr;
+      ctx.stroke();
+
+      // Girdle triangle
+      const o0 = outerR(a0);
+      drawFacetPath([[oM.x, oM.y], [o0.x, o0.y], [t0.x, t0.y]]);
+      ctx.fillStyle = `rgba(255,255,255,${0.02 + 0.06 * Math.sin(phase + i)})`;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 0.3 * dpr;
+      ctx.stroke();
+    }
+  }
+
+  function drawEmeraldFacets(s, phase) {
+    const ew = s * 0.75, eh = s, c = s * 0.22;
+    const rings = 3;
+    for (let r = 0; r < rings; r++) {
+      const t = (r + 1) / (rings + 1);
+      const iw = ew * (1 - t * 0.7), ih = eh * (1 - t * 0.7);
+      const ow = ew * (1 - (r / (rings + 1)) * 0.7), oh = eh * (1 - (r / (rings + 1)) * 0.7);
+      const ic = c * (1 - t * 0.5), oc = c * (1 - (r / (rings + 1)) * 0.5);
+      const b = 0.04 + 0.1 * Math.sin(phase * 1.1 + r * 1.5);
+
+      drawFacetPath([[-ow + oc, -oh], [ow - oc, -oh], [iw - ic, -ih], [-iw + ic, -ih]]);
+      ctx.fillStyle = `rgba(255,255,255,${b})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${0.04 + b * 0.3})`;
+      ctx.lineWidth = 0.4 * dpr;
+      ctx.stroke();
+
+      drawFacetPath([[-ow + oc, oh], [ow - oc, oh], [iw - ic, ih], [-iw + ic, ih]]);
+      ctx.fillStyle = `rgba(255,255,255,${b * 0.7})`;
+      ctx.fill(); ctx.stroke();
+
+      drawFacetPath([[ow, -oh + oc], [ow, oh - oc], [iw, ih - ic], [iw, -ih + ic]]);
+      ctx.fillStyle = `rgba(255,255,255,${0.03 + 0.07 * Math.sin(phase * 0.8 + r)})`;
+      ctx.fill(); ctx.stroke();
+
+      drawFacetPath([[-ow, -oh + oc], [-ow, oh - oc], [-iw, ih - ic], [-iw, -ih + ic]]);
+      ctx.fillStyle = `rgba(255,255,255,${0.03 + 0.07 * Math.sin(phase * 0.8 + r + 2)})`;
+      ctx.fill(); ctx.stroke();
+    }
+  }
+
+  // --- Draw a single floating gem ---
+  function drawGem(g) {
+    const s = g.size;
+    const [br, bg, bb] = g.color.base;
+    const [hr, hg, hb] = g.color.hi;
+    const [mr, mg, mb] = g.color.mid;
+    const [dr, dg, db] = g.color.dark;
+    const phase = g.phase;
+    const bx = s * 1.2;
+
+    ctx.save();
+    ctx.translate(g.x, g.y);
+    ctx.rotate(g.rot);
+    ctx.globalAlpha = 0.4 + 0.2 * Math.sin(phase * 0.7);
+
+    // Outer glow
+    const glowR = s * 2;
+    const glow = ctx.createRadialGradient(0, 0, s * 0.4, 0, 0, glowR);
+    glow.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.15)`);
+    glow.addColorStop(0.5, `rgba(${hr},${hg},${hb}, 0.04)`);
+    glow.addColorStop(1, `rgba(${hr},${hg},${hb}, 0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(0, 0, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Clip to shape
+    ctx.save();
+    clipShape(g.shape, s);
+    ctx.clip();
+
+    // Base gradient
+    const baseGrad = ctx.createRadialGradient(-s * 0.2, -s * 0.2, 0, 0, 0, s);
+    baseGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.95)`);
+    baseGrad.addColorStop(0.35, `rgba(${br},${bg},${bb}, 0.85)`);
+    baseGrad.addColorStop(0.65, `rgba(${mr},${mg},${mb}, 0.8)`);
+    baseGrad.addColorStop(1, `rgba(${dr},${dg},${db}, 0.9)`);
+    ctx.fillStyle = baseGrad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    // Facets
+    if (g.shape === 'emerald') {
+      drawEmeraldFacets(s, phase);
+    } else {
+      drawBrilliantFacets(g.shape, s, phase);
+    }
+
+    // Primary highlight
+    const hlAngle = phase * 0.4 + g.highlightOffset;
+    const hlX = Math.cos(hlAngle) * s * 0.2;
+    const hlY = Math.sin(hlAngle) * s * 0.2;
+    const hlGrad = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, s * 0.45);
+    hlGrad.addColorStop(0, `rgba(255,255,255,${0.5 + 0.3 * Math.sin(phase * 2)})`);
+    hlGrad.addColorStop(0.2, 'rgba(255,255,255,0.12)');
+    hlGrad.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+    hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hlGrad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    // Rainbow fire
+    const fp = Math.sin(phase * 3);
+    if (fp > 0.3) {
+      const intensity = (fp - 0.3) / 0.7;
+      const fc = fireColors[(g.fireIdx + Math.floor(phase)) % fireColors.length];
+      const fa = phase * 0.8 + g.highlightOffset;
+      const fx = Math.cos(fa) * s * 0.3, fy = Math.sin(fa) * s * 0.3;
+      const fGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, s * 0.3);
+      fGrad.addColorStop(0, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.2 * intensity})`);
+      fGrad.addColorStop(0.5, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.05 * intensity})`);
+      fGrad.addColorStop(1, `rgba(${fc[0]},${fc[1]},${fc[2]},0)`);
+      ctx.fillStyle = fGrad;
+      ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+    }
+
+    ctx.restore(); // restore clip
+
+    // Outline
+    clipShape(g.shape, s);
+    ctx.strokeStyle = `rgba(255,255,255,${0.1 + 0.06 * Math.sin(phase * 1.3)})`;
+    ctx.lineWidth = 0.6 * dpr;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function draw() {
+    if (currentPage !== 0) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    ctx.clearRect(0, 0, w, h);
+
+    for (const g of gems) {
+      g.x += g.dx;
+      g.y += g.dy;
+      g.rot += g.rotSpeed;
+      g.phase += g.twinkleSpeed;
+
+      if (g.y < -g.size * 3) { g.y = h + g.size * 3; g.x = Math.random() * w; }
+      if (g.x < -g.size * 3) g.x = w + g.size * 3;
+      if (g.x > w + g.size * 3) g.x = -g.size * 3;
+
+      drawGem(g);
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+// =======================================
 // JEWELED FRAME — Gems Embedded Like a Reliquary
 // =======================================
 (function initGems() {
