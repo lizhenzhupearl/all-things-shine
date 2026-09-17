@@ -688,9 +688,6 @@ function handleHeartTap() {
   setTimeout(() => floater.remove(), 1000);
 
   updateTodayScore();
-
-  // Auto-open note modal so user can immediately add a description
-  setTimeout(() => openNoteModal(newIndex), 400);
 }
 
 heartBtn.addEventListener('click', handleHeartTap);
