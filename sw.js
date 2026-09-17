@@ -1,5 +1,5 @@
 // Service Worker — network-first strategy for fast updates
-const CACHE_NAME = 'all-things-shine-v33';
+const CACHE_NAME = 'all-things-shine-v34';
 const ASSETS = [
   './',
   './index.html',

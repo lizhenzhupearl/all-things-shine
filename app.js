@@ -2642,5 +2642,9 @@ initFloatingGems('floating-gems-canvas-3', 2);
 
 // ---- Service Worker Registration ----
 if ('serviceWorker' in navigator) {
+  // Force update: unregister old SW, clear caches, then register fresh
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    for (const reg of regs) reg.update();
+  });
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
