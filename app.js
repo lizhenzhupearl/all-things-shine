@@ -1104,7 +1104,7 @@ renderJournal();
     gems.push({
       x: Math.random() * w,
       y: Math.random() * h,
-      size: (14 + Math.random() * 16) * dpr,
+      size: (7 + Math.random() * 8) * dpr,
       dx: (Math.random() - 0.5) * 1.5 * dpr,
       dy: (-0.8 - Math.random() * 1.2) * dpr,
       rot: Math.random() * Math.PI * 2,
