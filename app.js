@@ -675,11 +675,14 @@ function initThemePicker() {
     overlay.classList.remove('open');
   });
 
-  // Daily surprise mode
+  // Daily surprise mode — pick a random theme different from current
   randomBtn.addEventListener('click', () => {
-    localStorage.setItem(STORAGE_KEY_THEME_MODE, 'daily');
-    localStorage.removeItem(STORAGE_KEY_THEME);
-    applyTheme(getDailyThemeIndex());
+    const current = getActiveThemeIndex();
+    let pick;
+    do { pick = Math.floor(Math.random() * themes.length); } while (pick === current && themes.length > 1);
+    localStorage.setItem(STORAGE_KEY_THEME, pick.toString());
+    localStorage.setItem(STORAGE_KEY_THEME_MODE, 'manual');
+    applyTheme(pick);
     overlay.classList.remove('open');
   });
 
