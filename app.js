@@ -136,7 +136,8 @@ const STORAGE_KEY_ONBOARDED = 'heartbeat_onboarded';
 // THEME SYSTEM
 // =======================================
 const STORAGE_KEY_THEME = 'heartbeat_theme';
-const STORAGE_KEY_THEME_MODE = 'heartbeat_theme_mode'; // 'daily' or 'manual'
+const STORAGE_KEY_THEME_MODE = 'heartbeat_theme_mode'; // 'daily', 'manual', or 'photo'
+const STORAGE_KEY_PHOTO = 'heartbeat_theme_photo';
 
 const themes = [
   {
@@ -243,8 +244,8 @@ function loadThemePrefs() {
 function getActiveThemeIndex() {
   const prefs = loadThemePrefs();
   if (prefs.mode === 'daily') return getDailyThemeIndex();
-  // Default to Ocean Sunrise (index 1) if no preference set
-  if (!localStorage.getItem(STORAGE_KEY_THEME)) return 1;
+  // Default to Warm Sunset (index 8) if no preference set
+  if (!localStorage.getItem(STORAGE_KEY_THEME)) return 8;
   return prefs.manual;
 }
 
@@ -295,9 +296,28 @@ function renderThemeBg(index) {
   }
 }
 
+function applyPhotoBg(dataUrl) {
+  const bgEl = document.getElementById('theme-bg');
+  const appBg = document.getElementById('app-bg');
+  const css = `url(${dataUrl}) center/cover no-repeat`;
+  bgEl.style.background = css;
+  appBg.style.background = css;
+  // Clear decorative elements
+  bgEl.querySelectorAll('.theme-decor').forEach(el => el.remove());
+}
+
 function applyTheme(index) {
+  // Check if photo mode is active
+  const mode = localStorage.getItem(STORAGE_KEY_THEME_MODE);
+  if (mode === 'photo') {
+    const photo = localStorage.getItem(STORAGE_KEY_PHOTO);
+    if (photo) {
+      applyPhotoBg(photo);
+      document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+      return;
+    }
+  }
   renderThemeBg(index);
-  // Update the theme picker swatches to show active
   document.querySelectorAll('.theme-swatch').forEach((s, i) => {
     s.classList.toggle('active', i === index);
   });
@@ -353,6 +373,38 @@ function initThemePicker() {
     localStorage.removeItem(STORAGE_KEY_THEME);
     applyTheme(getDailyThemeIndex());
     overlay.classList.remove('open');
+  });
+
+  // Photo upload
+  document.getElementById('theme-photo-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      // Resize to save localStorage space (max 800px wide)
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 800;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        try {
+          localStorage.setItem(STORAGE_KEY_PHOTO, dataUrl);
+          localStorage.setItem(STORAGE_KEY_THEME_MODE, 'photo');
+          applyPhotoBg(dataUrl);
+          overlay.classList.remove('open');
+        } catch (err) {
+          alert('Photo is too large. Try a smaller image.');
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // reset so same file can be re-selected
   });
 
   // Show intro again

@@ -303,6 +303,11 @@ html, body {
   background: var(--accent-soft);
 }
 
+.theme-picker-upload {
+  margin-top: 8px;
+  text-align: center;
+}
+
 /* Sparkline chart */
 .sparkline-wrap {
   width: 100%;
