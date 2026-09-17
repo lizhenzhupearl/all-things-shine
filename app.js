@@ -1503,21 +1503,65 @@ const journalInput = document.getElementById('journal-input');
 const journalSaveBtn = document.getElementById('journal-save');
 const pastEntriesEl = document.getElementById('past-entries');
 
+// Migrate old journal format (single entry per day) to array format
+function migrateJournal() {
+  const journal = loadJournal();
+  let changed = false;
+  for (const key of Object.keys(journal)) {
+    if (journal[key] && !Array.isArray(journal[key]) && journal[key].text) {
+      journal[key] = [{ text: journal[key].text, savedAt: journal[key].savedAt }];
+      changed = true;
+    }
+  }
+  if (changed) saveJournal(journal);
+}
+migrateJournal();
+
+// Helper: get all entries for a day (always returns array)
+function getJournalEntries(journal, day) {
+  const e = journal[day];
+  if (!e) return [];
+  if (Array.isArray(e)) return e;
+  if (e.text) return [e]; // legacy fallback
+  return [];
+}
+
 function renderJournal() {
-  // Update date
   journalDateEl.textContent = formatDate(todayKey());
+  journalInput.value = '';
 
   const journal = loadJournal();
   const today = todayKey();
+  const scores = loadScores();
 
-  // Load today's draft if exists
-  if (journal[today]) {
-    journalInput.value = journal[today].text || '';
+  // Render today's entries above the input
+  const todayEntries = getJournalEntries(journal, today);
+  const todayListEl = document.getElementById('journal-today-entries');
+  if (todayEntries.length > 0) {
+    let html = '';
+    for (const e of todayEntries) {
+      html += `<div class="past-entry today-entry">
+        <div class="past-entry-text">${escapeHtml(e.text)}</div>
+      </div>`;
+    }
+    if (todayListEl) {
+      todayListEl.innerHTML = html;
+    } else {
+      // Create the container if it doesn't exist
+      const container = document.createElement('div');
+      container.id = 'journal-today-entries';
+      container.className = 'journal-today-entries';
+      container.innerHTML = html;
+      const journalToday = document.getElementById('journal-today');
+      journalToday.parentNode.insertBefore(container, journalToday);
+    }
+  } else if (todayListEl) {
+    todayListEl.innerHTML = '';
   }
 
   // Render past entries (most recent first, skip today)
   const days = Object.keys(journal)
-    .filter(d => d !== today && journal[d].text)
+    .filter(d => d !== today && getJournalEntries(journal, d).length > 0)
     .sort((a, b) => b.localeCompare(a));
 
   if (days.length === 0) {
@@ -1525,16 +1569,16 @@ function renderJournal() {
     return;
   }
 
-  const scores = loadScores();
   let html = `<h3>${t('past_entries')}</h3>`;
   for (const day of days.slice(0, 30)) {
-    const entry = journal[day];
+    const entries = getJournalEntries(journal, day);
     const heartCount = getHeartCount(scores, day);
-    html += `
-      <div class="past-entry">
-        <div class="past-entry-date">${formatDate(day)}</div>
-        <div class="past-entry-text">${escapeHtml(entry.text)}</div>
-        ${heartCount > 0 ? `<div class="past-entry-hearts">${miniHeart} ${heartCount}</div>` : ''}
+    html += `<div class="past-entry">
+        <div class="past-entry-date">${formatDate(day)}</div>`;
+    for (const e of entries) {
+      html += `<div class="past-entry-text">${escapeHtml(e.text)}</div>`;
+    }
+    html += `${heartCount > 0 ? `<div class="past-entry-hearts">${miniHeart} ${heartCount}</div>` : ''}
       </div>`;
   }
   pastEntriesEl.innerHTML = html;
@@ -1546,11 +1590,15 @@ function saveJournalEntry() {
 
   const journal = loadJournal();
   const today = todayKey();
-  journal[today] = {
+  if (!Array.isArray(journal[today])) journal[today] = [];
+  journal[today].push({
     text: text,
     savedAt: new Date().toISOString()
-  };
+  });
   saveJournal(journal);
+
+  // Clear input for next entry
+  journalInput.value = '';
 
   // Button feedback
   journalSaveBtn.textContent = t('saved');
@@ -1561,20 +1609,16 @@ function saveJournalEntry() {
   }, 1500);
 
   showToast(t('journal_saved'));
+  renderJournal();
 }
 
 journalSaveBtn.addEventListener('click', saveJournalEntry);
 
-// Auto-save draft on blur
-journalInput.addEventListener('blur', () => {
-  const text = journalInput.value.trim();
-  if (text) {
-    const journal = loadJournal();
-    journal[todayKey()] = {
-      text: text,
-      savedAt: new Date().toISOString()
-    };
-    saveJournal(journal);
+// Enter key saves on mobile
+journalInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    saveJournalEntry();
   }
 });
 
@@ -1608,7 +1652,7 @@ function renderStats() {
   document.getElementById('stat-streak').textContent = streak;
 
   // Journal entry count
-  const journalCount = Object.values(journal).filter(e => e.text).length;
+  const journalCount = Object.keys(journal).reduce((sum, d) => sum + getJournalEntries(journal, d).length, 0);
   document.getElementById('stat-journal-count').textContent = journalCount;
 
   // Chart — last 14 days
@@ -1713,19 +1757,19 @@ function setupStatCards(scores, journal, today, streak) {
         }
 
       } else if (type === 'journal') {
-        const days = Object.keys(journal).filter(d => journal[d].text).sort((a, b) => b.localeCompare(a));
+        const days = Object.keys(journal).filter(d => getJournalEntries(journal, d).length > 0).sort((a, b) => b.localeCompare(a));
         if (days.length === 0) {
           html = `<div class="stat-detail-empty">${t('no_journal')}</div>`;
         } else {
           html = `<div class="stat-detail-title">${t('journal_entries')}</div>`;
           for (const day of days) {
-            const preview = journal[day].text.length > 80
-              ? journal[day].text.slice(0, 80) + '...'
-              : journal[day].text;
-            html += `<div class="stat-detail-item">
-              <span class="stat-detail-item-text">${escapeHtml(preview)}</span>
-              <span class="stat-detail-item-meta">${formatDateShort(day)}</span>
-            </div>`;
+            for (const e of getJournalEntries(journal, day)) {
+              const preview = e.text.length > 80 ? e.text.slice(0, 80) + '...' : e.text;
+              html += `<div class="stat-detail-item">
+                <span class="stat-detail-item-text">${escapeHtml(preview)}</span>
+                <span class="stat-detail-item-meta">${formatDateShort(day)}</span>
+              </div>`;
+            }
           }
         }
       }
@@ -1768,7 +1812,7 @@ function renderChart(scores) {
 function renderRecentGratitudes(journal) {
   const list = document.getElementById('recent-gratitudes-list');
   const days = Object.keys(journal)
-    .filter(d => journal[d].text)
+    .filter(d => getJournalEntries(journal, d).length > 0)
     .sort((a, b) => b.localeCompare(a))
     .slice(0, 7);
 
@@ -1779,11 +1823,13 @@ function renderRecentGratitudes(journal) {
 
   let html = '';
   for (const day of days) {
-    html += `
-      <div class="gratitude-item">
-        <div class="gratitude-item-date">${formatDate(day)}</div>
-        <div class="gratitude-item-text">${escapeHtml(journal[day].text)}</div>
-      </div>`;
+    const entries = getJournalEntries(journal, day);
+    html += `<div class="gratitude-item">
+        <div class="gratitude-item-date">${formatDate(day)}</div>`;
+    for (const e of entries) {
+      html += `<div class="gratitude-item-text">${escapeHtml(e.text)}</div>`;
+    }
+    html += `</div>`;
   }
   list.innerHTML = html;
 }
