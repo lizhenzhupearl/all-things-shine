@@ -1,5 +1,5 @@
-// Service Worker for offline support
-const CACHE_NAME = 'all-things-shine-v32';
+// Service Worker — network-first strategy for fast updates
+const CACHE_NAME = 'all-things-shine-v33';
 const ASSETS = [
   './',
   './index.html',
@@ -24,8 +24,16 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Network-first: try fetching fresh, fall back to cache for offline
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(response => {
+        // Update cache with fresh response
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
