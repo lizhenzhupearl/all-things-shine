@@ -622,8 +622,9 @@ function renderSparkline(scores) {
   ctx.textBaseline = 'bottom';
   ctx.fillText(heartLabel, w - 2 * dpr, marginTop - 2 * dpr);
 
-  // X-axis: current date (bottom-right)
-  const todayLabel = formatDateShort(days[days.length - 1]);
+  // X-axis: current date with year (bottom-right)
+  const lastDate = new Date(days[days.length - 1] + 'T00:00:00');
+  const todayLabel = lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
   ctx.fillText(todayLabel, w - 2 * dpr, marginTop + chartH + 2 * dpr);
@@ -1066,83 +1067,449 @@ function showToast(msg) {
 renderJournal();
 
 // =======================================
-// FLOATING GEMS
+// JEWELED FRAME — Gems Embedded Like a Reliquary
 // =======================================
 (function initGems() {
   const canvas = document.getElementById('shimmer-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  const gemColors = [
-    { base: [220, 40, 60],  hi: [255, 120, 140], name: 'ruby' },
-    { base: [30, 90, 210],  hi: [120, 180, 255], name: 'sapphire' },
-    { base: [16, 160, 80],  hi: [100, 230, 150], name: 'emerald' },
-    { base: [140, 60, 200], hi: [200, 140, 255], name: 'amethyst' },
-    { base: [240, 180, 30], hi: [255, 230, 120], name: 'topaz' },
-    { base: [230, 100, 50], hi: [255, 180, 120], name: 'amber' },
-    { base: [50, 190, 210], hi: [140, 230, 245], name: 'aqua' },
-    { base: [220, 80, 180], hi: [255, 160, 220], name: 'pink sapphire' },
+  // --- Gold palette ---
+  const gold = {
+    dark:   [110, 82, 15],
+    mid:    [175, 140, 45],
+    bright: [230, 200, 90],
+    hi:     [255, 240, 180],
+  };
+
+  // --- Gem colors (cabochon style) ---
+  const gemPalette = [
+    { base: [160, 20, 40],  hi: [255, 120, 140], mid: [200, 50, 60],  dark: [100, 10, 20]  }, // ruby
+    { base: [30, 70, 180],  hi: [130, 180, 255], mid: [50, 100, 220], dark: [15, 40, 120]  }, // sapphire
+    { base: [20, 140, 80],  hi: [120, 230, 160], mid: [30, 170, 100], dark: [10, 90, 50]   }, // emerald
+    { base: [160, 100, 200],hi: [220, 180, 255], mid: [140, 80, 190], dark: [90, 40, 140]  }, // amethyst
+    { base: [80, 190, 180], hi: [170, 240, 230], mid: [50, 160, 150], dark: [25, 110, 100] }, // aquamarine
+    { base: [200, 100, 140],hi: [255, 180, 210], mid: [180, 70, 120], dark: [130, 40, 80]  }, // pink tourmaline
+    { base: [210, 190, 220],hi: [245, 240, 255], mid: [200, 185, 215],dark: [160, 150, 180]}, // moonstone
+    { base: [220, 180, 60], hi: [255, 235, 160], mid: [200, 160, 40], dark: [160, 120, 15] }, // citrine
   ];
 
-  // Gem shapes: 0=diamond, 1=hexagon, 2=star
-  const SHAPES = 3;
+  // Pearl color
+  const pearl = { base: [230, 225, 215], hi: [255, 252, 248], mid: [215, 210, 200], dark: [180, 175, 165] };
+
+  const fireColors = [
+    [255, 90, 90], [255, 170, 70], [255, 255, 90],
+    [90, 255, 140], [90, 170, 255], [170, 110, 255],
+  ];
 
   let w, h, dpr;
   function resize() {
     dpr = window.devicePixelRatio || 1;
     w = canvas.width = canvas.offsetWidth * dpr;
     h = canvas.height = canvas.offsetHeight * dpr;
+    layoutGems();
   }
+
+  // --- Gem layout: placed along borders like a jeweled frame ---
+  let gems = [];
+
+  function layoutGems() {
+    gems = [];
+    const margin = 18 * dpr;
+    const S = dpr; // scale factor
+
+    // Helper to add a gem
+    function add(x, y, size, shape, colorIdx, rot) {
+      const color = colorIdx === -1 ? pearl : gemPalette[colorIdx % gemPalette.length];
+      gems.push({
+        x, y, size: size * S, shape, color,
+        rot: rot || 0,
+        isPearl: colorIdx === -1,
+        phase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.006 + Math.random() * 0.008,
+        highlightOffset: Math.random() * Math.PI * 2,
+        fireIdx: Math.floor(Math.random() * fireColors.length),
+      });
+    }
+
+    // Four corner large gems
+    const cs = 16; // corner gem size
+    add(margin + cs * S, margin + cs * S, cs, 'round', 0);                     // top-left ruby
+    add(w - margin - cs * S, margin + cs * S, cs, 'round', 1);                 // top-right sapphire
+    add(margin + cs * S, h - margin - cs * S, cs, 'oval', 4);                  // bottom-left aqua
+    add(w - margin - cs * S, h - margin - cs * S, cs, 'round', 3);             // bottom-right amethyst
+
+    // Top edge gems
+    const topY = margin + 10 * S;
+    const topSpacing = (w - 2 * (margin + cs * S * 2)) / 5;
+    for (let i = 1; i <= 4; i++) {
+      const x = margin + cs * S * 2 + topSpacing * i;
+      const isPearl = i % 2 === 0;
+      if (isPearl) {
+        add(x, topY, 7, 'round', -1);
+      } else {
+        add(x, topY, 10, i === 1 ? 'marquise' : 'emerald', 2 + i, i === 1 ? Math.PI / 2 : 0);
+      }
+    }
+
+    // Bottom edge gems
+    const botY = h - margin - 10 * S;
+    for (let i = 1; i <= 4; i++) {
+      const x = margin + cs * S * 2 + topSpacing * i;
+      const isPearl = i % 2 === 1;
+      if (isPearl) {
+        add(x, botY, 7, 'round', -1);
+      } else {
+        add(x, botY, 10, i === 2 ? 'pear' : 'oval', 5 + i);
+      }
+    }
+
+    // Left edge gems
+    const leftX = margin + 10 * S;
+    const sideSpacing = (h - 2 * (margin + cs * S * 2)) / 4;
+    for (let i = 1; i <= 3; i++) {
+      const y = margin + cs * S * 2 + sideSpacing * i;
+      if (i === 2) {
+        add(leftX, y, 12, 'emerald', 7, Math.PI / 4);
+      } else {
+        add(leftX, y, 6, 'round', -1);
+      }
+    }
+
+    // Right edge gems
+    const rightX = w - margin - 10 * S;
+    for (let i = 1; i <= 3; i++) {
+      const y = margin + cs * S * 2 + sideSpacing * i;
+      if (i === 2) {
+        add(rightX, y, 12, 'pear', 5);
+      } else {
+        add(rightX, y, 6, 'round', -1);
+      }
+    }
+
+    // Small accent pearls scattered along the midpoints of edges
+    add(w * 0.5, margin + 3 * S, 4, 'round', -1);
+    add(w * 0.5, h - margin - 3 * S, 4, 'round', -1);
+  }
+
   resize();
   window.addEventListener('resize', resize);
 
-  const COUNT = 14;
-  const gems = [];
-  for (let i = 0; i < COUNT; i++) {
-    const color = gemColors[Math.floor(Math.random() * gemColors.length)];
-    gems.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: (4 + Math.random() * 6) * dpr,
-      dx: (Math.random() - 0.5) * 0.2,
-      dy: -0.1 - Math.random() * 0.2,
-      rot: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.008,
-      phase: Math.random() * Math.PI * 2,
-      twinkleSpeed: 0.01 + Math.random() * 0.015,
-      color: color,
-      shape: Math.floor(Math.random() * SHAPES),
-    });
-  }
-
-  function drawDiamond(ctx, s) {
+  // --- Shape clip paths ---
+  function clipShape(shape, s) {
     ctx.beginPath();
-    ctx.moveTo(0, -s);
-    ctx.lineTo(s * 0.65, 0);
-    ctx.lineTo(0, s);
-    ctx.lineTo(-s * 0.65, 0);
-    ctx.closePath();
-  }
-
-  function drawHexagon(ctx, s) {
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-      const a = (Math.PI / 3) * i - Math.PI / 6;
-      const method = i === 0 ? 'moveTo' : 'lineTo';
-      ctx[method](Math.cos(a) * s, Math.sin(a) * s);
-    }
-    ctx.closePath();
-  }
-
-  function drawStar(ctx, s) {
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      const a = (Math.PI / 2) * i;
-      ctx.moveTo(0, 0);
-      ctx.lineTo(Math.cos(a) * s, Math.sin(a) * s);
+    if (shape === 'round') {
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+    } else if (shape === 'oval') {
+      ctx.ellipse(0, 0, s, s * 0.7, 0, 0, Math.PI * 2);
+    } else if (shape === 'emerald') {
+      const ew = s * 0.78, eh = s, c = s * 0.24;
+      ctx.moveTo(-ew + c, -eh); ctx.lineTo(ew - c, -eh);
+      ctx.lineTo(ew, -eh + c);  ctx.lineTo(ew, eh - c);
+      ctx.lineTo(ew - c, eh);   ctx.lineTo(-ew + c, eh);
+      ctx.lineTo(-ew, eh - c);  ctx.lineTo(-ew, -eh + c);
+      ctx.closePath();
+    } else if (shape === 'pear') {
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s * 0.55, -s * 0.5, s * 0.85, s * 0.1, s * 0.68, s * 0.55);
+      ctx.bezierCurveTo(s * 0.52, s * 0.88, s * 0.2, s, 0, s);
+      ctx.bezierCurveTo(-s * 0.2, s, -s * 0.52, s * 0.88, -s * 0.68, s * 0.55);
+      ctx.bezierCurveTo(-s * 0.85, s * 0.1, -s * 0.55, -s * 0.5, 0, -s);
+      ctx.closePath();
+    } else if (shape === 'marquise') {
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s * 0.85, -s * 0.55, s * 0.85, s * 0.55, 0, s);
+      ctx.bezierCurveTo(-s * 0.85, s * 0.55, -s * 0.85, -s * 0.55, 0, -s);
+      ctx.closePath();
     }
   }
 
+  // --- Gold bezel with 3D metallic look ---
+  function drawBezel(shape, s, phase) {
+    const bezelW = s * 0.22;
+    const outerS = s + bezelW;
+
+    // Drop shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 6 * dpr;
+    ctx.shadowOffsetY = 2 * dpr;
+    clipShape(shape, outerS);
+    ctx.fillStyle = 'rgba(0,0,0,0.01)'; // trigger shadow
+    ctx.fill();
+    ctx.restore();
+
+    // Outer gold ring
+    clipShape(shape, outerS);
+    const [gd0, gd1, gd2] = gold.dark;
+    const [gm0, gm1, gm2] = gold.mid;
+    const [gb0, gb1, gb2] = gold.bright;
+    const [gh0, gh1, gh2] = gold.hi;
+
+    const ringGrad = ctx.createLinearGradient(-outerS, -outerS, outerS, outerS);
+    ringGrad.addColorStop(0, `rgb(${gh0},${gh1},${gh2})`);
+    ringGrad.addColorStop(0.25, `rgb(${gb0},${gb1},${gb2})`);
+    ringGrad.addColorStop(0.5, `rgb(${gm0},${gm1},${gm2})`);
+    ringGrad.addColorStop(0.75, `rgb(${gb0},${gb1},${gb2})`);
+    ringGrad.addColorStop(1, `rgb(${gd0},${gd1},${gd2})`);
+    ctx.fillStyle = ringGrad;
+    ctx.fill();
+
+    // Inner cutout (will be covered by gem)
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    clipShape(shape, s);
+    ctx.fill();
+    ctx.restore();
+
+    // Bezel inner edge highlight (raised lip)
+    clipShape(shape, s + 1.5 * dpr);
+    ctx.strokeStyle = `rgba(${gh0},${gh1},${gh2}, ${0.5 + 0.2 * Math.sin(phase * 0.5)})`;
+    ctx.lineWidth = 1.2 * dpr;
+    ctx.stroke();
+
+    // Bezel outer edge shadow
+    clipShape(shape, outerS);
+    ctx.strokeStyle = `rgba(${gd0},${gd1},${gd2}, 0.6)`;
+    ctx.lineWidth = 1 * dpr;
+    ctx.stroke();
+
+    // Gold granulation dots (tiny decorative bumps around larger gems)
+    if (s > 10 * dpr) {
+      const dotCount = shape === 'round' ? 12 : 8;
+      const dotR = outerS + 4 * dpr;
+      const dotSize = 1.5 * dpr;
+      for (let i = 0; i < dotCount; i++) {
+        const a = (Math.PI * 2 / dotCount) * i;
+        const dx = Math.cos(a) * dotR, dy = Math.sin(a) * dotR;
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotSize, 0, Math.PI * 2);
+        const dGrad = ctx.createRadialGradient(dx - dotSize * 0.3, dy - dotSize * 0.3, 0, dx, dy, dotSize);
+        dGrad.addColorStop(0, `rgb(${gh0},${gh1},${gh2})`);
+        dGrad.addColorStop(1, `rgb(${gm0},${gm1},${gm2})`);
+        ctx.fillStyle = dGrad;
+        ctx.fill();
+      }
+    }
+  }
+
+  // --- Cabochon gem body (smooth dome, no facets — like the reference image) ---
+  function drawCabochon(g) {
+    const s = g.size;
+    const [br, bg, bb] = g.color.base;
+    const [hr, hg, hb] = g.color.hi;
+    const [mr, mg, mb] = g.color.mid;
+    const [dr, dg, db] = g.color.dark;
+    const phase = g.phase;
+    const bx = s * 1.2;
+
+    // Clip to shape
+    ctx.save();
+    clipShape(g.shape, s);
+    ctx.clip();
+
+    // Base dome gradient (3D curvature)
+    const domeGrad = ctx.createRadialGradient(-s * 0.25, -s * 0.3, s * 0.1, 0, 0, s);
+    domeGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 1)`);
+    domeGrad.addColorStop(0.3, `rgba(${br},${bg},${bb}, 0.95)`);
+    domeGrad.addColorStop(0.6, `rgba(${mr},${mg},${mb}, 0.9)`);
+    domeGrad.addColorStop(0.85, `rgba(${dr},${dg},${db}, 0.95)`);
+    domeGrad.addColorStop(1, `rgba(${dr*0.6|0},${dg*0.6|0},${db*0.6|0}, 1)`);
+    ctx.fillStyle = domeGrad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    // Depth ring (darker edge to show gem is recessed into bezel)
+    clipShape(g.shape, s);
+    const edgeGrad = ctx.createRadialGradient(0, 0, s * 0.7, 0, 0, s);
+    edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    edgeGrad.addColorStop(0.8, 'rgba(0,0,0,0)');
+    edgeGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
+    ctx.fillStyle = edgeGrad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    if (!g.isPearl) {
+      // --- Subtle internal patterns (for colored gems) ---
+      // Silk-like inclusions
+      for (let i = 0; i < 3; i++) {
+        const a = (Math.PI * 2 / 3) * i + phase * 0.02;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * s * 0.1, Math.sin(a) * s * 0.1);
+        ctx.lineTo(Math.cos(a) * s * 0.7, Math.sin(a) * s * 0.7);
+        ctx.strokeStyle = `rgba(${hr},${hg},${hb}, ${0.06 + 0.03 * Math.sin(phase + i)})`;
+        ctx.lineWidth = 2 * dpr;
+        ctx.stroke();
+      }
+    } else {
+      // --- Pearl iridescence ---
+      const iriAngle = phase * 0.3;
+      const iriGrad = ctx.createLinearGradient(
+        Math.cos(iriAngle) * s, Math.sin(iriAngle) * s,
+        -Math.cos(iriAngle) * s, -Math.sin(iriAngle) * s
+      );
+      iriGrad.addColorStop(0, 'rgba(255,200,200,0.08)');
+      iriGrad.addColorStop(0.33, 'rgba(200,255,220,0.06)');
+      iriGrad.addColorStop(0.66, 'rgba(200,210,255,0.08)');
+      iriGrad.addColorStop(1, 'rgba(255,220,255,0.06)');
+      ctx.fillStyle = iriGrad;
+      ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+    }
+
+    // --- Primary specular highlight (the big bright spot) ---
+    const hlX = -s * 0.2 + Math.cos(phase * 0.3 + g.highlightOffset) * s * 0.08;
+    const hlY = -s * 0.28 + Math.sin(phase * 0.3 + g.highlightOffset) * s * 0.05;
+    const hlR = s * (g.isPearl ? 0.35 : 0.28);
+    const hlGrad = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, hlR);
+    const hlBright = 0.85 + 0.15 * Math.sin(phase * 1.5);
+    hlGrad.addColorStop(0, `rgba(255,255,255,${hlBright})`);
+    hlGrad.addColorStop(0.3, `rgba(255,255,255,${hlBright * 0.4})`);
+    hlGrad.addColorStop(0.6, 'rgba(255,255,255,0.05)');
+    hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hlGrad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    // --- Small secondary highlight ---
+    const hl2X = s * 0.15, hl2Y = s * 0.2;
+    const hl2Grad = ctx.createRadialGradient(hl2X, hl2Y, 0, hl2X, hl2Y, s * 0.15);
+    hl2Grad.addColorStop(0, `rgba(255,255,255,${0.2 + 0.1 * Math.sin(phase * 2)})`);
+    hl2Grad.addColorStop(0.5, 'rgba(255,255,255,0.03)');
+    hl2Grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hl2Grad;
+    ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+
+    // --- Rainbow fire flash (colored gems only) ---
+    if (!g.isPearl) {
+      const fp = Math.sin(phase * 2.5);
+      if (fp > 0.4) {
+        const intensity = (fp - 0.4) / 0.6;
+        const fc = fireColors[(g.fireIdx + Math.floor(phase * 0.5)) % fireColors.length];
+        const fa = phase * 0.6 + g.highlightOffset;
+        const fx = Math.cos(fa) * s * 0.25, fy = Math.sin(fa) * s * 0.25;
+        const fGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, s * 0.35);
+        fGrad.addColorStop(0, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.18 * intensity})`);
+        fGrad.addColorStop(0.4, `rgba(${fc[0]},${fc[1]},${fc[2]},${0.05 * intensity})`);
+        fGrad.addColorStop(1, `rgba(${fc[0]},${fc[1]},${fc[2]},0)`);
+        ctx.fillStyle = fGrad;
+        ctx.fillRect(-bx, -bx, bx * 2, bx * 2);
+      }
+    }
+
+    ctx.restore(); // restore clip
+  }
+
+  // --- Gold filigree curls connecting gems along borders ---
+  function drawFiligree() {
+    const [gm0, gm1, gm2] = gold.mid;
+    const [gb0, gb1, gb2] = gold.bright;
+    const margin = 18 * dpr;
+
+    ctx.save();
+    ctx.strokeStyle = `rgba(${gm0},${gm1},${gm2}, 0.25)`;
+    ctx.lineWidth = 1.2 * dpr;
+    ctx.lineCap = 'round';
+
+    // Top border filigree
+    const topY = margin + 10 * dpr;
+    for (let x = margin + 40 * dpr; x < w - margin - 40 * dpr; x += 20 * dpr) {
+      ctx.beginPath();
+      ctx.moveTo(x, topY - 5 * dpr);
+      ctx.quadraticCurveTo(x + 5 * dpr, topY - 12 * dpr, x + 10 * dpr, topY - 5 * dpr);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, topY + 5 * dpr);
+      ctx.quadraticCurveTo(x + 5 * dpr, topY + 12 * dpr, x + 10 * dpr, topY + 5 * dpr);
+      ctx.stroke();
+    }
+
+    // Bottom border filigree
+    const botY = h - margin - 10 * dpr;
+    for (let x = margin + 40 * dpr; x < w - margin - 40 * dpr; x += 20 * dpr) {
+      ctx.beginPath();
+      ctx.moveTo(x, botY - 5 * dpr);
+      ctx.quadraticCurveTo(x + 5 * dpr, botY - 12 * dpr, x + 10 * dpr, botY - 5 * dpr);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, botY + 5 * dpr);
+      ctx.quadraticCurveTo(x + 5 * dpr, botY + 12 * dpr, x + 10 * dpr, botY + 5 * dpr);
+      ctx.stroke();
+    }
+
+    // Left border filigree
+    const leftX = margin + 10 * dpr;
+    for (let y = margin + 50 * dpr; y < h - margin - 50 * dpr; y += 20 * dpr) {
+      ctx.beginPath();
+      ctx.moveTo(leftX - 5 * dpr, y);
+      ctx.quadraticCurveTo(leftX - 12 * dpr, y + 5 * dpr, leftX - 5 * dpr, y + 10 * dpr);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(leftX + 5 * dpr, y);
+      ctx.quadraticCurveTo(leftX + 12 * dpr, y + 5 * dpr, leftX + 5 * dpr, y + 10 * dpr);
+      ctx.stroke();
+    }
+
+    // Right border filigree
+    const rightX = w - margin - 10 * dpr;
+    for (let y = margin + 50 * dpr; y < h - margin - 50 * dpr; y += 20 * dpr) {
+      ctx.beginPath();
+      ctx.moveTo(rightX - 5 * dpr, y);
+      ctx.quadraticCurveTo(rightX - 12 * dpr, y + 5 * dpr, rightX - 5 * dpr, y + 10 * dpr);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rightX + 5 * dpr, y);
+      ctx.quadraticCurveTo(rightX + 12 * dpr, y + 5 * dpr, rightX + 5 * dpr, y + 10 * dpr);
+      ctx.stroke();
+    }
+
+    // Corner flourishes (small spiral near each corner gem)
+    const corners = [
+      [margin, margin, 1, 1],
+      [w - margin, margin, -1, 1],
+      [margin, h - margin, 1, -1],
+      [w - margin, h - margin, -1, -1],
+    ];
+    ctx.strokeStyle = `rgba(${gb0},${gb1},${gb2}, 0.2)`;
+    ctx.lineWidth = 1 * dpr;
+    for (const [cx, cy, sx, sy] of corners) {
+      // Small decorative swirl
+      for (let r = 0; r < 2; r++) {
+        ctx.beginPath();
+        const startA = r * Math.PI;
+        for (let a = 0; a <= Math.PI * 1.5; a += 0.1) {
+          const radius = (8 + a * 4) * dpr;
+          const px = cx + Math.cos(startA + a * sx) * radius * sx;
+          const py = cy + Math.sin(startA + a * sy) * radius * sy;
+          if (a === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // --- Outer frame border lines ---
+  function drawFrameBorder() {
+    const [gm0, gm1, gm2] = gold.mid;
+    const [gd0, gd1, gd2] = gold.dark;
+    const margin = 18 * dpr;
+    const r = 8 * dpr; // corner radius
+
+    // Outer line
+    ctx.beginPath();
+    ctx.roundRect(margin - 4 * dpr, margin - 4 * dpr, w - 2 * margin + 8 * dpr, h - 2 * margin + 8 * dpr, r + 2 * dpr);
+    ctx.strokeStyle = `rgba(${gd0},${gd1},${gd2}, 0.3)`;
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.stroke();
+
+    // Inner line
+    ctx.beginPath();
+    ctx.roundRect(margin + 24 * dpr, margin + 24 * dpr, w - 2 * margin - 48 * dpr, h - 2 * margin - 48 * dpr, r);
+    ctx.strokeStyle = `rgba(${gm0},${gm1},${gm2}, 0.15)`;
+    ctx.lineWidth = 0.8 * dpr;
+    ctx.stroke();
+  }
+
+  // --- Main render loop ---
   function draw() {
     if (currentPage !== 0) {
       requestAnimationFrame(draw);
@@ -1150,76 +1517,24 @@ renderJournal();
     }
     ctx.clearRect(0, 0, w, h);
 
+    // Draw the frame structure
+    drawFrameBorder();
+    drawFiligree();
+
+    // Draw each gem: bezel first, then cabochon stone
     for (const g of gems) {
-      g.x += g.dx;
-      g.y += g.dy;
-      g.rot += g.rotSpeed;
       g.phase += g.twinkleSpeed;
-
-      if (g.y < -20) { g.y = h + 20; g.x = Math.random() * w; }
-      if (g.x < -20) g.x = w + 20;
-      if (g.x > w + 20) g.x = -20;
-
-      const twinkle = 0.3 + 0.4 * Math.sin(g.phase);
-      const [br, bg, bb] = g.color.base;
-      const [hr, hg, hb] = g.color.hi;
 
       ctx.save();
       ctx.translate(g.x, g.y);
       ctx.rotate(g.rot);
-      ctx.globalAlpha = twinkle;
 
-      // Outer glow
-      const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, g.size * 3);
-      glowGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.25)`);
-      glowGrad.addColorStop(1, `rgba(${hr},${hg},${hb}, 0)`);
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, g.size * 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Gem body
-      if (g.shape === 0) drawDiamond(ctx, g.size);
-      else if (g.shape === 1) drawHexagon(ctx, g.size);
-
-      if (g.shape < 2) {
-        // Faceted gradient fill
-        const bodyGrad = ctx.createLinearGradient(-g.size, -g.size, g.size, g.size);
-        bodyGrad.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.9)`);
-        bodyGrad.addColorStop(0.5, `rgba(${br},${bg},${bb}, 0.75)`);
-        bodyGrad.addColorStop(1, `rgba(${br*0.6|0},${bg*0.6|0},${bb*0.6|0}, 0.8)`);
-        ctx.fillStyle = bodyGrad;
-        ctx.fill();
-
-        // Highlight facet (top-left shine)
-        ctx.beginPath();
-        if (g.shape === 0) {
-          ctx.moveTo(0, -g.size);
-          ctx.lineTo(g.size * 0.25, -g.size * 0.15);
-          ctx.lineTo(-g.size * 0.25, -g.size * 0.15);
-          ctx.closePath();
-        } else {
-          ctx.arc(-g.size * 0.25, -g.size * 0.25, g.size * 0.35, 0, Math.PI * 2);
-        }
-        ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.3 * Math.sin(g.phase * 1.5)})`;
-        ctx.fill();
-      } else {
-        // Star sparkle
-        drawStar(ctx, g.size);
-        ctx.strokeStyle = `rgba(${hr},${hg},${hb}, 0.8)`;
-        ctx.lineWidth = 1.5 * dpr;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // Center glow
-        ctx.beginPath();
-        ctx.arc(0, 0, g.size * 0.3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.3 * Math.sin(g.phase)})`;
-        ctx.fill();
-      }
+      drawBezel(g.shape, g.size, g.phase);
+      drawCabochon(g);
 
       ctx.restore();
     }
+
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
