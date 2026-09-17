@@ -1215,6 +1215,13 @@ function handleHeartTap() {
   setTimeout(() => floater.remove(), 1000);
 
   updateTodayScore();
+
+  // Hide hint after 3 hearts total
+  const total = Object.keys(loadScores()).reduce((sum, k) => sum + getHeartCount(loadScores(), k), 0);
+  if (total >= 3) {
+    const hint = document.querySelector('.heart-hint');
+    if (hint) hint.style.opacity = '0';
+  }
 }
 
 heartBtn.addEventListener('click', handleHeartTap);
@@ -1283,6 +1290,16 @@ function saveNote() {
 updateGreeting();
 updateTodayScore();
 setInterval(updateGreeting, 60000);
+
+// Hide heart hint if user already has 3+ hearts
+(function() {
+  const scores = loadScores();
+  const total = Object.keys(scores).reduce((sum, k) => sum + getHeartCount(scores, k), 0);
+  if (total >= 3) {
+    const hint = document.querySelector('.heart-hint');
+    if (hint) hint.style.display = 'none';
+  }
+})();
 
 // =======================================
 // CROWN JEWEL HEART — Canvas Rendering
