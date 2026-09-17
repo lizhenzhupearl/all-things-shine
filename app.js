@@ -563,13 +563,18 @@ function renderSparkline(scores) {
   const min = Math.min(...points);
   const max = Math.max(...points);
   const range = max - min || 1;
-  const padY = h * 0.15;
+
+  // Layout margins to make room for labels
+  const fontSize = 10 * dpr;
+  const marginBottom = fontSize + 4 * dpr; // space for date label
+  const marginTop = fontSize + 2 * dpr;    // space for heart count label
+  const chartH = h - marginTop - marginBottom;
 
   function px(i) {
     return (i / (points.length - 1)) * w;
   }
   function py(v) {
-    return padY + (1 - (v - min) / range) * (h - padY * 2);
+    return marginTop + (1 - (v - min) / range) * chartH;
   }
 
   // Fill gradient under the line
@@ -582,8 +587,8 @@ function renderSparkline(scores) {
   for (let i = 1; i < points.length; i++) {
     ctx.lineTo(px(i), py(points[i]));
   }
-  ctx.lineTo(px(points.length - 1), h);
-  ctx.lineTo(px(0), h);
+  ctx.lineTo(px(points.length - 1), marginTop + chartH);
+  ctx.lineTo(px(0), marginTop + chartH);
   ctx.closePath();
   ctx.fillStyle = grad;
   ctx.fill();
@@ -606,6 +611,22 @@ function renderSparkline(scores) {
   ctx.arc(lastX, lastY, 2.5 * dpr, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.fill();
+
+  // --- Axis labels ---
+  ctx.font = `${fontSize}px Nunito, sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+
+  // Y-axis: accumulated heart count (top-right of chart, next to end dot)
+  const heartLabel = `${points[points.length - 1]}`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(heartLabel, w - 2 * dpr, marginTop - 2 * dpr);
+
+  // X-axis: current date (bottom-right)
+  const todayLabel = formatDateShort(days[days.length - 1]);
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'top';
+  ctx.fillText(todayLabel, w - 2 * dpr, marginTop + chartH + 2 * dpr);
 }
 
 function renderHeartNotes(entries) {
