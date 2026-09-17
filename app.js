@@ -256,34 +256,6 @@ const themes = [
     }
   },
   {
-    name: 'Watercolor Wash',
-    bg: 'linear-gradient(160deg, #fdf8f0 0%, #f0e8e0 50%, #fdf8f0 100%)',
-    decor: [],
-    canvasDraw(ctx, w, h, t) {
-      ctx.fillStyle = '#fdf8f0'; ctx.fillRect(0, 0, w, h);
-      const blobs = [
-        {x:.25,y:.2,rx:.3,ry:.2,c:[210,180,220,0.2],rot:.3},
-        {x:.7,y:.35,rx:.25,ry:.35,c:[180,210,230,0.18],rot:-.2},
-        {x:.4,y:.6,rx:.35,ry:.2,c:[230,190,190,0.15],rot:.5},
-        {x:.15,y:.8,rx:.2,ry:.25,c:[190,220,200,0.17],rot:-.4},
-        {x:.8,y:.7,rx:.22,ry:.18,c:[230,210,170,0.2],rot:.1},
-        {x:.5,y:.1,rx:.28,ry:.15,c:[200,190,230,0.13],rot:.6},
-      ];
-      for (const b of blobs) {
-        ctx.save();
-        ctx.translate(b.x*w, b.y*h);
-        ctx.rotate(b.rot + Math.sin(t*0.1+b.x*5)*0.05);
-        const g = ctx.createRadialGradient(0,0,0,0,0,Math.max(b.rx*w,b.ry*h));
-        const a = b.c[3] + 0.03*Math.sin(t*0.3+b.y*5);
-        g.addColorStop(0,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${a})`);
-        g.addColorStop(0.5,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${a*0.5})`);
-        g.addColorStop(1,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},0)`);
-        ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0,0,b.rx*w,b.ry*h,0,0,Math.PI*2); ctx.fill();
-        ctx.restore();
-      }
-    }
-  },
-  {
     name: 'Starfield',
     bg: 'linear-gradient(180deg, #0a0a1a 0%, #0d1030 40%, #1a1045 70%, #0a0a1a 100%)',
     decor: [],
@@ -311,33 +283,6 @@ const themes = [
           sg.addColorStop(0,`rgba(200,220,255,${tw*0.12})`); sg.addColorStop(1,'rgba(200,220,255,0)');
           ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,sy,sz*4,0,Math.PI*2); ctx.fill();
         }
-      }
-    }
-  },
-  {
-    name: 'Silk Flow',
-    bg: 'linear-gradient(160deg, #f5e6e0 0%, #e8d0c8 50%, #f0ddd5 100%)',
-    decor: [],
-    canvasDraw(ctx, w, h, t) {
-      const bg = ctx.createLinearGradient(0,0,w,h);
-      bg.addColorStop(0,'#f5e6e0'); bg.addColorStop(0.5,'#e8d0c8'); bg.addColorStop(1,'#f0ddd5');
-      ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
-      for (let l=0; l<8; l++) {
-        const baseY = (l+1)*h/9;
-        ctx.beginPath();
-        for (let x=0; x<=w; x+=2) {
-          const wave = Math.sin(x*0.015+t*0.3+l*1.2)*15 + Math.sin(x*0.008+t*0.15+l*0.8)*25;
-          if (x===0) ctx.moveTo(x,baseY+wave); else ctx.lineTo(x,baseY+wave);
-        }
-        ctx.strokeStyle = `rgba(180,140,120,${0.04+0.02*Math.sin(t*0.2+l)})`;
-        ctx.lineWidth = 12; ctx.stroke();
-      }
-      for (let s=0; s<3; s++) {
-        const sx=(0.2+s*0.3)*w+Math.sin(t*0.2+s)*20, sy=(0.3+s*0.2)*h;
-        const sg = ctx.createRadialGradient(sx,sy,0,sx,sy,w*0.2);
-        sg.addColorStop(0,`rgba(255,255,255,${0.08+0.04*Math.sin(t*0.4+s*2)})`);
-        sg.addColorStop(1,'rgba(255,255,255,0)');
-        ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(sx,sy,w*0.2,h*0.08,0.3+s*0.5,0,Math.PI*2); ctx.fill();
       }
     }
   },
