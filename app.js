@@ -827,6 +827,27 @@ function initThemePicker() {
     overlay.classList.remove('open');
   });
 
+  // Language toggle in picker
+  const pickerLangBtns = document.querySelectorAll('.picker-lang-btn');
+  function updatePickerLangBtns() {
+    const lang = getLang();
+    pickerLangBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  }
+  pickerLangBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setLang(btn.dataset.lang);
+      updatePickerLangBtns();
+      updateGreeting();
+      updateTodayScore();
+      renderJournal();
+      if (currentPage === 2) renderStats();
+    });
+  });
+
+  // Sync picker lang buttons when opening
+  const origOpenHandler = themeBtn.onclick;
+  themeBtn.addEventListener('click', updatePickerLangBtns);
+
   // Photo upload
   document.getElementById('theme-photo-input').addEventListener('change', (e) => {
     const file = e.target.files[0];

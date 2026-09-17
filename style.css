@@ -318,6 +318,33 @@ html, body {
   background: var(--accent-soft);
 }
 
+.picker-lang-toggle {
+  display: flex;
+  gap: 0;
+  margin-top: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--accent-soft);
+}
+
+.picker-lang-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.picker-lang-btn.active {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
 .theme-picker-upload {
   margin-top: 8px;
   text-align: center;
