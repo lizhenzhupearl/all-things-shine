@@ -10,6 +10,7 @@ const STORAGE_KEY_LANG = 'heartbeat_lang';
 const i18n = {
   en: {
     // Onboarding
+    app_title: 'All Things Shine',
     ob1_line1: 'In a world that moves so fast,<br>this is your quiet corner.',
     ob1_line2: 'A place to pause,<br>to notice the small things —<br>a warm meal, a kind word,<br>flowers on the way home.',
     ob2_line1: 'Every time something good happens,<br>no matter how small,<br>press the heart.',
@@ -64,6 +65,7 @@ const i18n = {
     swipe: 'swipe',
   },
   zh: {
+    app_title: '万物闪耀',
     ob1_line1: '在这个快节奏的世界里，<br>这是属于你的安静角落。',
     ob1_line2: '停下来，<br>留意那些小小的美好 ——<br>一顿暖心的饭，一句温柔的话，<br>回家路上的花。',
     ob2_line1: '每当有好事发生，<br>无论多么微小，<br>按下这颗心。',
@@ -76,7 +78,7 @@ const i18n = {
     ob3_small: '这些文字只属于你。<br>随时可以回头看看。',
     ob_begin: '开始',
     greetings: [
-      '万物皆有光', '留意美好', '你已足够好', '一个小小的快乐',
+      '万物闪耀', '留意美好', '你已足够好', '一个小小的快乐',
       '让它发光', '呼吸与绽放', '光就在这里', '今天有件美好的事',
       '此刻很重要', '轻轻地，柔柔地', '世界是温柔的', '你属于这里',
     ],
