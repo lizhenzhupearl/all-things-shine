@@ -2642,7 +2642,14 @@ initFloatingGems('floating-gems-canvas-3', 2);
   requestAnimationFrame(draw);
 })();
 
-// ---- Service Worker Registration ----
+// ---- Service Worker Registration & Auto-Update ----
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  // Listen for update notification from new SW
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'SW_UPDATED') {
+      showToast(getLang() === 'zh' ? '已更新到最新版本' : 'Updated to latest version');
+    }
+  });
 }
