@@ -1282,6 +1282,61 @@ html, body {
   color: rgba(255,255,255,0.45) !important;
 }
 
+/* Game-style language selector */
+.lang-selector {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.lang-option:active {
+  background: rgba(255,255,255,0.1);
+}
+
+.lang-cursor {
+  font-size: 14px;
+  color: rgba(255,255,255,0.9);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  animation: none;
+}
+
+.lang-option.active .lang-cursor {
+  opacity: 1;
+  animation: cursor-bounce 0.8s ease-in-out infinite;
+}
+
+.lang-label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  transition: color 0.15s ease;
+  letter-spacing: 0.03em;
+}
+
+.lang-option.active .lang-label {
+  color: rgba(255,255,255,0.95);
+}
+
+@keyframes cursor-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
 /* Heart demo */
 .onboarding-heart-demo {
   width: 70px;

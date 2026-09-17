@@ -25,13 +25,23 @@
       <canvas id="onboarding-bg" class="onboarding-bg"></canvas>
       <div class="onboarding-pages" id="onboarding-pages">
 
-        <!-- Intro 1: The Opening -->
+        <!-- Intro 1: The Opening + Language Select -->
         <div class="onboarding-page">
           <div class="onboarding-content">
             <h1 class="onboarding-title">All Things Shine</h1>
             <div class="onboarding-text">
-              <p>In a world that moves so fast,<br>this is your quiet corner.</p>
-              <p>A place to pause,<br>to notice the small things —<br>a warm meal, a kind word,<br>flowers on the way home.</p>
+              <p data-i18n="ob1_line1">In a world that moves so fast,<br>this is your quiet corner.</p>
+              <p data-i18n="ob1_line2">A place to pause,<br>to notice the small things —<br>a warm meal, a kind word,<br>flowers on the way home.</p>
+            </div>
+            <div class="lang-selector" id="lang-selector">
+              <div class="lang-option active" data-lang="en">
+                <span class="lang-cursor">&#9654;</span>
+                <span class="lang-label">English</span>
+              </div>
+              <div class="lang-option" data-lang="zh">
+                <span class="lang-cursor">&#9654;</span>
+                <span class="lang-label">中文</span>
+              </div>
             </div>
           </div>
         </div>
@@ -43,15 +53,15 @@
               <canvas id="onboarding-heart-canvas" class="onboarding-heart-canvas"></canvas>
             </div>
             <div class="onboarding-text">
-              <p>Every time something good happens,<br>no matter how small,<br>press the heart.</p>
-              <div class="onboarding-examples">
-                <span class="onboarding-tag">a healthy breakfast</span>
-                <span class="onboarding-tag">bought flowers</span>
-                <span class="onboarding-tag">called a friend</span>
-                <span class="onboarding-tag">took a walk</span>
-                <span class="onboarding-tag">cooked dinner</span>
+              <p data-i18n="ob2_line1">Every time something good happens,<br>no matter how small,<br>press the heart.</p>
+              <div class="onboarding-examples" id="onboarding-tags">
+                <span class="onboarding-tag" data-i18n="ob2_tag1">a healthy breakfast</span>
+                <span class="onboarding-tag" data-i18n="ob2_tag2">bought flowers</span>
+                <span class="onboarding-tag" data-i18n="ob2_tag3">called a friend</span>
+                <span class="onboarding-tag" data-i18n="ob2_tag4">took a walk</span>
+                <span class="onboarding-tag" data-i18n="ob2_tag5">cooked dinner</span>
               </div>
-              <p class="onboarding-small">One tap. One moment of gratitude.<br>Over time, these moments add up.</p>
+              <p class="onboarding-small" data-i18n="ob2_small">One tap. One moment of gratitude.<br>Over time, these moments add up.</p>
             </div>
           </div>
         </div>
@@ -61,15 +71,15 @@
           <div class="onboarding-content">
             <div class="onboarding-journal-demo">
               <div class="onboarding-journal-card">
-                <span class="onboarding-journal-date">Tuesday, September 16</span>
-                <p class="onboarding-journal-text">Today my colleague brought me coffee without asking. Such a small thing, but it made my whole morning brighter. Grateful for people who notice.</p>
+                <span class="onboarding-journal-date" data-i18n="ob3_date">Tuesday, September 16</span>
+                <p class="onboarding-journal-text" data-i18n="ob3_sample">Today my colleague brought me coffee without asking. Such a small thing, but it made my whole morning brighter. Grateful for people who notice.</p>
               </div>
             </div>
             <div class="onboarding-text">
-              <p>Some days, you'll want to say more.<br>Swipe to your gratitude journal —<br>write what made you smile.</p>
-              <p class="onboarding-small">It stays here, just for you.<br>Look back whenever you'd like.</p>
+              <p data-i18n="ob3_line1">Some days, you'll want to say more.<br>Swipe to your gratitude journal —<br>write what made you smile.</p>
+              <p class="onboarding-small" data-i18n="ob3_small">It stays here, just for you.<br>Look back whenever you'd like.</p>
             </div>
-            <button class="onboarding-begin" id="onboarding-begin">Begin</button>
+            <button class="onboarding-begin" id="onboarding-begin" data-i18n="ob_begin">Begin</button>
           </div>
         </div>
 
@@ -127,13 +137,13 @@
         <div class="journal-content">
           <div class="journal-header">
             <p class="journal-date" id="journal-date"></p>
-            <p class="journal-subtitle">What are you grateful for today?</p>
+            <p class="journal-subtitle" data-i18n="journal_subtitle">What are you grateful for today?</p>
           </div>
           <div class="journal-entries" id="journal-entries">
             <!-- Today's entry area -->
             <div class="journal-today" id="journal-today">
-              <textarea id="journal-input" placeholder="Today I'm grateful for..." rows="5"></textarea>
-              <button id="journal-save" class="save-btn">Save</button>
+              <textarea id="journal-input" data-i18n-placeholder="journal_placeholder" placeholder="Today I'm grateful for..." rows="5"></textarea>
+              <button id="journal-save" class="save-btn" data-i18n="save">Save</button>
             </div>
             <!-- Past entries loaded here -->
             <div id="past-entries" class="past-entries"></div>
@@ -145,32 +155,32 @@
       <section id="page-stats" class="page page-stats">
         <canvas class="floating-gems-canvas" id="floating-gems-canvas-3"></canvas>
         <div class="stats-content">
-          <h2 class="stats-title"><svg class="title-gem" viewBox="0 0 40 40"><polygon points="20,2 38,16 30,38 10,38 2,16" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="2,16 20,20 38,16" fill="none" stroke="currentColor" stroke-width="1"/><polyline points="10,38 20,20 30,38" fill="none" stroke="currentColor" stroke-width="1"/><line x1="20" y1="2" x2="20" y2="20" stroke="currentColor" stroke-width="1"/></svg> Your Journey <svg class="title-gem" viewBox="0 0 40 40"><polygon points="20,2 38,16 30,38 10,38 2,16" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="2,16 20,20 38,16" fill="none" stroke="currentColor" stroke-width="1"/><polyline points="10,38 20,20 30,38" fill="none" stroke="currentColor" stroke-width="1"/><line x1="20" y1="2" x2="20" y2="20" stroke="currentColor" stroke-width="1"/></svg></h2>
+          <h2 class="stats-title"><svg class="title-gem" viewBox="0 0 40 40"><polygon points="20,2 38,16 30,38 10,38 2,16" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="2,16 20,20 38,16" fill="none" stroke="currentColor" stroke-width="1"/><polyline points="10,38 20,20 30,38" fill="none" stroke="currentColor" stroke-width="1"/><line x1="20" y1="2" x2="20" y2="20" stroke="currentColor" stroke-width="1"/></svg> <span data-i18n="stats_title">Your Journey</span> <svg class="title-gem" viewBox="0 0 40 40"><polygon points="20,2 38,16 30,38 10,38 2,16" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="2,16 20,20 38,16" fill="none" stroke="currentColor" stroke-width="1"/><polyline points="10,38 20,20 30,38" fill="none" stroke="currentColor" stroke-width="1"/><line x1="20" y1="2" x2="20" y2="20" stroke="currentColor" stroke-width="1"/></svg></h2>
           <div class="stats-grid">
             <div class="stat-card" id="card-today" data-card="today">
               <span class="stat-number" id="stat-today-score">0</span>
-              <span class="stat-label">Today's Hearts</span>
+              <span class="stat-label" data-i18n="stat_today">Today's Hearts</span>
             </div>
             <div class="stat-card" id="card-total" data-card="total">
               <span class="stat-number" id="stat-total-score">0</span>
-              <span class="stat-label">Total Hearts</span>
+              <span class="stat-label" data-i18n="stat_total">Total Hearts</span>
             </div>
             <div class="stat-card" id="card-streak" data-card="streak">
               <span class="stat-number" id="stat-streak">0</span>
-              <span class="stat-label">Day Streak</span>
+              <span class="stat-label" data-i18n="stat_streak">Day Streak</span>
             </div>
             <div class="stat-card" id="card-journal" data-card="journal">
               <span class="stat-number" id="stat-journal-count">0</span>
-              <span class="stat-label">Journal Entries</span>
+              <span class="stat-label" data-i18n="stat_journal">Journal Entries</span>
             </div>
           </div>
           <div class="stat-detail" id="stat-detail"></div>
           <div class="chart-section">
-            <h3 class="chart-title">Last 14 Days</h3>
+            <h3 class="chart-title" data-i18n="chart_14days">Last 14 Days</h3>
             <div class="chart-container" id="chart-container"></div>
           </div>
           <div class="recent-gratitudes">
-            <h3 class="chart-title">Recent Gratitudes</h3>
+            <h3 class="chart-title" data-i18n="chart_recent">Recent Gratitudes</h3>
             <div id="recent-gratitudes-list" class="gratitudes-list"></div>
           </div>
         </div>
@@ -182,21 +192,21 @@
     <div class="theme-picker-overlay" id="theme-picker-overlay">
       <div class="theme-picker" id="theme-picker">
         <div class="theme-picker-header">
-          <span>Choose your mood</span>
+          <span data-i18n="picker_title">Choose your mood</span>
           <button class="theme-picker-close" id="theme-picker-close">&times;</button>
         </div>
         <div class="theme-picker-grid" id="theme-picker-grid"></div>
         <label class="theme-picker-random theme-picker-upload" id="theme-picker-upload">
-          Your photo
+          <span data-i18n="picker_photo">Your photo</span>
           <input type="file" accept="image/*" id="theme-photo-input" hidden>
         </label>
-        <button class="theme-picker-random" id="theme-picker-about" style="margin-top: 8px;">Read the intro again</button>
+        <button class="theme-picker-random" id="theme-picker-about" style="margin-top: 8px;" data-i18n="picker_intro">Read the intro again</button>
       </div>
     </div>
 
     <!-- Page dots indicator -->
     <div class="page-dots">
-      <span class="swipe-label">swipe</span>
+      <span class="swipe-label" data-i18n="swipe">swipe</span>
       <div class="dots-row">
         <span class="dot active" data-page="0"></span>
         <span class="dot" data-page="1"></span>

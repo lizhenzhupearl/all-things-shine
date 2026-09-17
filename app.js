@@ -2,6 +2,156 @@
    All Things Shine — App Logic
    ======================================== */
 
+// =======================================
+// INTERNATIONALIZATION (i18n)
+// =======================================
+const STORAGE_KEY_LANG = 'heartbeat_lang';
+
+const i18n = {
+  en: {
+    // Onboarding
+    ob1_line1: 'In a world that moves so fast,<br>this is your quiet corner.',
+    ob1_line2: 'A place to pause,<br>to notice the small things —<br>a warm meal, a kind word,<br>flowers on the way home.',
+    ob2_line1: 'Every time something good happens,<br>no matter how small,<br>press the heart.',
+    ob2_tag1: 'a healthy breakfast', ob2_tag2: 'bought flowers', ob2_tag3: 'called a friend',
+    ob2_tag4: 'took a walk', ob2_tag5: 'cooked dinner',
+    ob2_small: 'One tap. One moment of gratitude.<br>Over time, these moments add up.',
+    ob3_date: 'Tuesday, September 16',
+    ob3_sample: 'Today my colleague brought me coffee without asking. Such a small thing, but it made my whole morning brighter. Grateful for people who notice.',
+    ob3_line1: 'Some days, you\'ll want to say more.<br>Swipe to your gratitude journal —<br>write what made you smile.',
+    ob3_small: 'It stays here, just for you.<br>Look back whenever you\'d like.',
+    ob_begin: 'Begin',
+    // Heart page
+    greetings: [
+      'All things shine', 'Notice the good', 'You are enough', 'One small joy',
+      'Let it glow', 'Breathe and bloom', 'Light is here', 'Something beautiful today',
+      'This moment matters', 'Softly, gently', 'The world is kind', 'You belong here',
+    ],
+    tap_to_add: 'tap to add note',
+    moments: 'moments',
+    modal_title: 'What was this heart for?',
+    modal_placeholder: 'e.g. healthy meal, bought flowers...',
+    cancel: 'Cancel',
+    save: 'Save',
+    saved: 'Saved!',
+    // Journal
+    journal_subtitle: 'What are you grateful for today?',
+    journal_placeholder: 'Today I\'m grateful for...',
+    journal_saved: 'Journal saved',
+    past_entries: 'Past Entries',
+    // Stats
+    stat_today: 'Today\'s Hearts', stat_total: 'Total Hearts',
+    stat_streak: 'Day Streak', stat_journal: 'Journal Entries',
+    stats_title: 'Your Journey',
+    chart_14days: 'Last 14 Days', chart_recent: 'Recent Gratitudes',
+    no_hearts_today: 'No hearts yet today',
+    todays_hearts: 'Today\'s Hearts',
+    no_hearts: 'No hearts yet',
+    all_hearts: 'All Hearts',
+    streak_empty: 'Start a streak by logging a heart today',
+    consecutive_days: (n) => `${n} consecutive day${n > 1 ? 's' : ''}`,
+    n_hearts: (n) => `${n} heart${n > 1 ? 's' : ''}`,
+    no_journal: 'No journal entries yet',
+    journal_entries: 'Journal Entries',
+    no_note: 'no note',
+    gratitudes_empty: 'Start writing to see your gratitudes here',
+    // Theme picker
+    picker_title: 'Choose your mood',
+    picker_photo: 'Your photo',
+    picker_intro: 'Read the intro again',
+    photo_too_large: 'Photo is too large. Try a smaller image.',
+    // Nav
+    swipe: 'swipe',
+  },
+  zh: {
+    ob1_line1: '在这个快节奏的世界里，<br>这是属于你的安静角落。',
+    ob1_line2: '停下来，<br>留意那些小小的美好 ——<br>一顿暖心的饭，一句温柔的话，<br>回家路上的花。',
+    ob2_line1: '每当有好事发生，<br>无论多么微小，<br>按下这颗心。',
+    ob2_tag1: '健康的早餐', ob2_tag2: '买了花', ob2_tag3: '给朋友打了电话',
+    ob2_tag4: '散了步', ob2_tag5: '做了晚餐',
+    ob2_small: '轻轻一按，记录一刻感恩。<br>日积月累，这些瞬间汇聚成光。',
+    ob3_date: '九月十六日 星期二',
+    ob3_sample: '今天同事默默给我带了咖啡。很小的一件事，却温暖了整个早晨。感恩身边那些会留意的人。',
+    ob3_line1: '有些日子，你想说得更多。<br>滑动到感恩日记 ——<br>写下让你微笑的事。',
+    ob3_small: '这些文字只属于你。<br>随时可以回头看看。',
+    ob_begin: '开始',
+    greetings: [
+      '万物皆有光', '留意美好', '你已足够好', '一个小小的快乐',
+      '让它发光', '呼吸与绽放', '光就在这里', '今天有件美好的事',
+      '此刻很重要', '轻轻地，柔柔地', '世界是温柔的', '你属于这里',
+    ],
+    tap_to_add: '点击添加备注',
+    moments: '个瞬间',
+    modal_title: '这颗心为了什么？',
+    modal_placeholder: '例如：健康的一餐、买了花...',
+    cancel: '取消',
+    save: '保存',
+    saved: '已保存！',
+    journal_subtitle: '今天你感恩什么？',
+    journal_placeholder: '今天我感恩...',
+    journal_saved: '日记已保存',
+    past_entries: '过往记录',
+    stat_today: '今日之心', stat_total: '累计之心',
+    stat_streak: '连续天数', stat_journal: '日记条数',
+    stats_title: '你的旅程',
+    chart_14days: '最近14天', chart_recent: '近期感恩',
+    no_hearts_today: '今天还没有记录',
+    todays_hearts: '今日之心',
+    no_hearts: '还没有记录',
+    all_hearts: '所有记录',
+    streak_empty: '今天记录一颗心，开始你的连续打卡',
+    consecutive_days: (n) => `连续 ${n} 天`,
+    n_hearts: (n) => `${n} 颗心`,
+    no_journal: '还没有日记',
+    journal_entries: '日记条数',
+    no_note: '无备注',
+    gratitudes_empty: '写下你的感恩，它们会出现在这里',
+    picker_title: '选择你的心情',
+    picker_photo: '你的照片',
+    picker_intro: '再看一次介绍',
+    photo_too_large: '照片太大了，请选择小一点的图片。',
+    swipe: '滑动',
+  }
+};
+
+function getLang() {
+  return localStorage.getItem(STORAGE_KEY_LANG) || 'en';
+}
+
+function setLang(lang) {
+  localStorage.setItem(STORAGE_KEY_LANG, lang);
+  applyLang(lang);
+}
+
+function t(key) {
+  const lang = getLang();
+  return (i18n[lang] && i18n[lang][key]) || i18n.en[key] || key;
+}
+
+function applyLang(lang) {
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = i18n[lang][key] || i18n.en[key];
+    if (val) el.innerHTML = val;
+  });
+  // Update all data-i18n-placeholder elements
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = i18n[lang][key] || i18n.en[key];
+    if (val) el.placeholder = val;
+  });
+  // Update date locale
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  // Update language selector active state
+  document.querySelectorAll('.lang-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+}
+
+// Initialize language on load
+applyLang(getLang());
+
 // ---- Storage helpers ----
 const STORAGE_KEY_SCORES = 'heartbeat_scores';
 const STORAGE_KEY_JOURNAL = 'heartbeat_journal';
@@ -47,23 +197,25 @@ const greetings = [
 ];
 
 function getGreeting() {
-  // One greeting per day, consistent throughout the day
   const now = new Date();
   const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-  return greetings[dayOfYear % greetings.length];
+  const g = i18n[getLang()].greetings || greetings;
+  return g[dayOfYear % g.length];
 }
 
 // ---- Format date ----
+function getLocale() { return getLang() === 'zh' ? 'zh-CN' : 'en-US'; }
+
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(getLocale(), {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   });
 }
 
 function formatDateShort(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' });
 }
 
 // ---- Small heart SVG for inline use ----
@@ -90,6 +242,17 @@ const STORAGE_KEY_ONBOARDED = 'heartbeat_onboarded';
   const beginBtn = document.getElementById('onboarding-begin');
 
   overlay.classList.remove('hidden');
+
+  // Language selector
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const lang = opt.dataset.lang;
+      setLang(lang);
+      // Refresh greeting
+      if (typeof updateGreeting === 'function') updateGreeting();
+    });
+  });
+
   let page = 0;
   const total = 3;
 
@@ -683,7 +846,7 @@ function initThemePicker() {
           applyPhotoBg(dataUrl);
           overlay.classList.remove('open');
         } catch (err) {
-          alert('Photo is too large. Try a smaller image.');
+          alert(t('photo_too_large'));
         }
       };
       img.src = ev.target.result;
@@ -842,7 +1005,7 @@ function updateGreeting() {
 function formatTime(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' });
 }
 
 function updateTodayScore() {
@@ -851,7 +1014,7 @@ function updateTodayScore() {
   renderHeartNotes(entries);
   // Quiet total
   const total = Object.keys(scores).reduce((sum, k) => sum + getHeartCount(scores, k), 0);
-  document.getElementById('total-quiet').textContent = total > 0 ? `${total} moments` : '';
+  document.getElementById('total-quiet').textContent = total > 0 ? `${total} ${t('moments')}` : '';
   // Sparkline
   renderSparkline(scores);
 }
@@ -963,7 +1126,7 @@ function renderSparkline(scores) {
 
   // X-axis: current date with year (bottom-right)
   const lastDate = new Date(days[days.length - 1] + 'T00:00:00');
-  const todayLabel = lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const todayLabel = lastDate.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
   ctx.fillText(todayLabel, w - 2 * dpr, marginTop + chartH + 2 * dpr);
@@ -979,7 +1142,7 @@ function renderHeartNotes(entries) {
     const e = entries[i];
     const noteText = e.note
       ? `<span class="heart-note-text">${escapeHtml(e.note)}</span>`
-      : `<span class="heart-note-text empty">tap to add note</span>`;
+      : `<span class="heart-note-text empty">${t('tap_to_add')}</span>`;
     const timeText = e.time ? formatTime(e.time) : '';
     html += `
       <div class="heart-note" data-index="${i}">
@@ -1039,11 +1202,11 @@ function createNoteModal() {
   noteModalOverlay.className = 'note-modal-overlay';
   noteModalOverlay.innerHTML = `
     <div class="note-modal">
-      <div class="note-modal-title">What was this heart for?</div>
-      <input id="note-modal-input" type="text" placeholder="e.g. healthy meal, bought flowers..." maxlength="100" />
+      <div class="note-modal-title">${t('modal_title')}</div>
+      <input id="note-modal-input" type="text" placeholder="${t('modal_placeholder')}" maxlength="100" />
       <div class="note-modal-actions">
-        <button class="note-modal-btn cancel" id="note-modal-cancel">Cancel</button>
-        <button class="note-modal-btn save" id="note-modal-save">Save</button>
+        <button class="note-modal-btn cancel" id="note-modal-cancel">${t('cancel')}</button>
+        <button class="note-modal-btn save" id="note-modal-save">${t('save')}</button>
       </div>
     </div>`;
   document.body.appendChild(noteModalOverlay);
@@ -1319,7 +1482,7 @@ function renderJournal() {
   }
 
   const scores = loadScores();
-  let html = '<h3>Past Entries</h3>';
+  let html = `<h3>${t('past_entries')}</h3>`;
   for (const day of days.slice(0, 30)) {
     const entry = journal[day];
     const heartCount = getHeartCount(scores, day);
@@ -1346,14 +1509,14 @@ function saveJournalEntry() {
   saveJournal(journal);
 
   // Button feedback
-  journalSaveBtn.textContent = 'Saved!';
+  journalSaveBtn.textContent = t('saved');
   journalSaveBtn.classList.add('saved');
   setTimeout(() => {
-    journalSaveBtn.textContent = 'Save';
+    journalSaveBtn.textContent = t('save');
     journalSaveBtn.classList.remove('saved');
   }, 1500);
 
-  showToast('Journal saved');
+  showToast(t('journal_saved'));
 }
 
 journalSaveBtn.addEventListener('click', saveJournalEntry);
@@ -1443,14 +1606,14 @@ function setupStatCards(scores, journal, today, streak) {
       if (type === 'today') {
         const entries = scores[today] || [];
         if (entries.length === 0) {
-          html = '<div class="stat-detail-empty">No hearts yet today</div>';
+          html = `<div class="stat-detail-empty">${t('no_hearts_today')}</div>`;
         } else {
-          html = '<div class="stat-detail-title">Today\'s Hearts</div>';
+          html = `<div class="stat-detail-title">${t('todays_hearts')}</div>`;
           for (const e of entries) {
             const time = e.time ? formatTime(e.time) : '';
             const text = e.note
               ? `<span class="stat-detail-item-text">${escapeHtml(e.note)}</span>`
-              : `<span class="stat-detail-item-text empty">no note</span>`;
+              : `<span class="stat-detail-item-text empty">${t('no_note')}</span>`;
             html += `<div class="stat-detail-item">
               <span class="stat-detail-item-icon">${miniHeart}</span>
               ${text}
@@ -1462,9 +1625,9 @@ function setupStatCards(scores, journal, today, streak) {
       } else if (type === 'total') {
         const allDays = Object.keys(scores).sort((a, b) => b.localeCompare(a));
         if (allDays.length === 0) {
-          html = '<div class="stat-detail-empty">No hearts yet</div>';
+          html = `<div class="stat-detail-empty">${t('no_hearts')}</div>`;
         } else {
-          html = '<div class="stat-detail-title">All Hearts</div>';
+          html = `<div class="stat-detail-title">${t('all_hearts')}</div>`;
           for (const day of allDays) {
             const entries = scores[day];
             if (!Array.isArray(entries) || entries.length === 0) continue;
@@ -1473,7 +1636,7 @@ function setupStatCards(scores, journal, today, streak) {
               const time = e.time ? formatTime(e.time) : '';
               const text = e.note
                 ? `<span class="stat-detail-item-text">${escapeHtml(e.note)}</span>`
-                : `<span class="stat-detail-item-text empty">no note</span>`;
+                : `<span class="stat-detail-item-text empty">${t('no_note')}</span>`;
               html += `<div class="stat-detail-item">
                 <span class="stat-detail-item-icon">${miniHeart}</span>
                 ${text}
@@ -1486,17 +1649,20 @@ function setupStatCards(scores, journal, today, streak) {
 
       } else if (type === 'streak') {
         if (streak === 0) {
-          html = '<div class="stat-detail-empty">Start a streak by logging a heart today</div>';
+          html = `<div class="stat-detail-empty">${t('streak_empty')}</div>`;
         } else {
-          html = `<div class="stat-detail-title">${streak} consecutive day${streak > 1 ? 's' : ''}</div>`;
+          const lang = getLang();
+          const cdf = i18n[lang].consecutive_days || i18n.en.consecutive_days;
+          html = `<div class="stat-detail-title">${cdf(streak)}</div>`;
           const d = new Date();
           for (let i = 0; i < streak; i++) {
             const key = d.toISOString().slice(0, 10);
             const count = getHeartCount(scores, key);
+            const nhf = i18n[lang].n_hearts || i18n.en.n_hearts;
             html += `<div class="stat-detail-item">
               <span class="stat-detail-item-icon">${miniHeart}</span>
               <span class="stat-detail-item-text">${formatDate(key)}</span>
-              <span class="stat-detail-item-meta">${count} heart${count > 1 ? 's' : ''}</span>
+              <span class="stat-detail-item-meta">${nhf(count)}</span>
             </div>`;
             d.setDate(d.getDate() - 1);
           }
@@ -1505,9 +1671,9 @@ function setupStatCards(scores, journal, today, streak) {
       } else if (type === 'journal') {
         const days = Object.keys(journal).filter(d => journal[d].text).sort((a, b) => b.localeCompare(a));
         if (days.length === 0) {
-          html = '<div class="stat-detail-empty">No journal entries yet</div>';
+          html = `<div class="stat-detail-empty">${t('no_journal')}</div>`;
         } else {
-          html = '<div class="stat-detail-title">Journal Entries</div>';
+          html = `<div class="stat-detail-title">${t('journal_entries')}</div>`;
           for (const day of days) {
             const preview = journal[day].text.length > 80
               ? journal[day].text.slice(0, 80) + '...'
@@ -1563,7 +1729,7 @@ function renderRecentGratitudes(journal) {
     .slice(0, 7);
 
   if (days.length === 0) {
-    list.innerHTML = '<div class="empty-state">Start writing to see your gratitudes here</div>';
+    list.innerHTML = `<div class="empty-state">${t('gratitudes_empty')}</div>`;
     return;
   }
 
