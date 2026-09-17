@@ -226,6 +226,262 @@ const themes = [
     `,
     decor: []
   },
+  // --- Animated canvas backgrounds ---
+  {
+    name: 'Bokeh Lights',
+    bg: 'linear-gradient(180deg, #1a1025 0%, #2d1b3d 50%, #1a1025 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a1025'); bg.addColorStop(0.5, '#2d1b3d'); bg.addColorStop(1, '#1a1025');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      const bk = [
+        {x:.2,y:.15,r:.08,c:[255,200,100]},{x:.7,y:.25,r:.12,c:[255,150,180]},
+        {x:.4,y:.45,r:.1,c:[150,200,255]},{x:.85,y:.6,r:.09,c:[255,220,130]},
+        {x:.15,y:.7,r:.11,c:[200,150,255]},{x:.55,y:.8,r:.07,c:[255,180,150]},
+        {x:.3,y:.3,r:.06,c:[180,255,200]},{x:.75,y:.45,r:.05,c:[255,255,180]},
+        {x:.5,y:.15,r:.04,c:[255,160,200]},{x:.9,y:.85,r:.06,c:[150,220,255]},
+        {x:.1,y:.9,r:.05,c:[255,200,180]},{x:.6,y:.65,r:.08,c:[220,180,255]},
+      ];
+      for (const b of bk) {
+        const bx = b.x*w + Math.sin(t*0.3+b.x*10)*5;
+        const by = b.y*h + Math.cos(t*0.2+b.y*10)*5;
+        const br = b.r*w;
+        const a = 0.15 + 0.08*Math.sin(t*0.5+b.x*5);
+        const g = ctx.createRadialGradient(bx,by,0,bx,by,br);
+        g.addColorStop(0,`rgba(${b.c},${a+0.1})`); g.addColorStop(0.4,`rgba(${b.c},${a})`);
+        g.addColorStop(0.7,`rgba(${b.c},${a*0.3})`); g.addColorStop(1,`rgba(${b.c},0)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
+      }
+    }
+  },
+  {
+    name: 'Watercolor Wash',
+    bg: 'linear-gradient(160deg, #fdf8f0 0%, #f0e8e0 50%, #fdf8f0 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      ctx.fillStyle = '#fdf8f0'; ctx.fillRect(0, 0, w, h);
+      const blobs = [
+        {x:.25,y:.2,rx:.3,ry:.2,c:[210,180,220,0.2],rot:.3},
+        {x:.7,y:.35,rx:.25,ry:.35,c:[180,210,230,0.18],rot:-.2},
+        {x:.4,y:.6,rx:.35,ry:.2,c:[230,190,190,0.15],rot:.5},
+        {x:.15,y:.8,rx:.2,ry:.25,c:[190,220,200,0.17],rot:-.4},
+        {x:.8,y:.7,rx:.22,ry:.18,c:[230,210,170,0.2],rot:.1},
+        {x:.5,y:.1,rx:.28,ry:.15,c:[200,190,230,0.13],rot:.6},
+      ];
+      for (const b of blobs) {
+        ctx.save();
+        ctx.translate(b.x*w, b.y*h);
+        ctx.rotate(b.rot + Math.sin(t*0.1+b.x*5)*0.05);
+        const g = ctx.createRadialGradient(0,0,0,0,0,Math.max(b.rx*w,b.ry*h));
+        const a = b.c[3] + 0.03*Math.sin(t*0.3+b.y*5);
+        g.addColorStop(0,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${a})`);
+        g.addColorStop(0.5,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},${a*0.5})`);
+        g.addColorStop(1,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},0)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0,0,b.rx*w,b.ry*h,0,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  },
+  {
+    name: 'Starfield',
+    bg: 'linear-gradient(180deg, #0a0a1a 0%, #0d1030 40%, #1a1045 70%, #0a0a1a 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      const bg = ctx.createLinearGradient(0,0,0,h);
+      bg.addColorStop(0,'#0a0a1a'); bg.addColorStop(0.4,'#0d1030');
+      bg.addColorStop(0.7,'#1a1045'); bg.addColorStop(1,'#0a0a1a');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+      // Nebula
+      const nb = ctx.createRadialGradient(w*0.3,h*0.4,0,w*0.3,h*0.4,w*0.4);
+      nb.addColorStop(0,'rgba(80,40,120,0.15)'); nb.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = nb; ctx.fillRect(0,0,w,h);
+      const nb2 = ctx.createRadialGradient(w*0.7,h*0.6,0,w*0.7,h*0.6,w*0.35);
+      nb2.addColorStop(0,'rgba(30,60,120,0.12)'); nb2.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = nb2; ctx.fillRect(0,0,w,h);
+      // Stars
+      function sr(i) { let x=Math.sin(42+i*127.1)*43758.5453; return x-Math.floor(x); }
+      for (let i=0; i<150; i++) {
+        const sx=sr(i)*w, sy=sr(i+1000)*h, sz=0.3+sr(i+2000)*1.8;
+        const tw=0.3+0.7*(0.5+0.5*Math.sin(t*(1+sr(i+3000)*2)+sr(i+4000)*10));
+        ctx.beginPath(); ctx.arc(sx,sy,sz,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,255,255,${tw})`; ctx.fill();
+        if (sz>1.2) {
+          const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,sz*4);
+          sg.addColorStop(0,`rgba(200,220,255,${tw*0.12})`); sg.addColorStop(1,'rgba(200,220,255,0)');
+          ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,sy,sz*4,0,Math.PI*2); ctx.fill();
+        }
+      }
+    }
+  },
+  {
+    name: 'Silk Flow',
+    bg: 'linear-gradient(160deg, #f5e6e0 0%, #e8d0c8 50%, #f0ddd5 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      const bg = ctx.createLinearGradient(0,0,w,h);
+      bg.addColorStop(0,'#f5e6e0'); bg.addColorStop(0.5,'#e8d0c8'); bg.addColorStop(1,'#f0ddd5');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+      for (let l=0; l<8; l++) {
+        const baseY = (l+1)*h/9;
+        ctx.beginPath();
+        for (let x=0; x<=w; x+=2) {
+          const wave = Math.sin(x*0.015+t*0.3+l*1.2)*15 + Math.sin(x*0.008+t*0.15+l*0.8)*25;
+          if (x===0) ctx.moveTo(x,baseY+wave); else ctx.lineTo(x,baseY+wave);
+        }
+        ctx.strokeStyle = `rgba(180,140,120,${0.04+0.02*Math.sin(t*0.2+l)})`;
+        ctx.lineWidth = 12; ctx.stroke();
+      }
+      for (let s=0; s<3; s++) {
+        const sx=(0.2+s*0.3)*w+Math.sin(t*0.2+s)*20, sy=(0.3+s*0.2)*h;
+        const sg = ctx.createRadialGradient(sx,sy,0,sx,sy,w*0.2);
+        sg.addColorStop(0,`rgba(255,255,255,${0.08+0.04*Math.sin(t*0.4+s*2)})`);
+        sg.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(sx,sy,w*0.2,h*0.08,0.3+s*0.5,0,Math.PI*2); ctx.fill();
+      }
+    }
+  },
+  {
+    name: 'Stained Glass',
+    bg: 'linear-gradient(160deg, #2a1530 0%, #1a1520 50%, #201025 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      ctx.fillStyle = '#1a1520'; ctx.fillRect(0,0,w,h);
+      const pts = [
+        {x:.15,y:.1,c:[180,50,60]},{x:.5,y:.05,c:[50,80,180]},{x:.85,y:.12,c:[60,150,80]},
+        {x:.1,y:.35,c:[160,80,180]},{x:.4,y:.3,c:[200,160,50]},{x:.7,y:.28,c:[50,140,160]},
+        {x:.9,y:.4,c:[180,60,100]},{x:.2,y:.55,c:[80,60,160]},{x:.55,y:.5,c:[60,130,60]},
+        {x:.8,y:.58,c:[180,120,50]},{x:.1,y:.75,c:[50,100,180]},{x:.4,y:.72,c:[180,50,80]},
+        {x:.65,y:.78,c:[100,160,60]},{x:.9,y:.8,c:[140,60,160]},{x:.3,y:.92,c:[200,150,60]},
+        {x:.7,y:.95,c:[50,120,150]},
+      ];
+      const step = Math.max(4, Math.round(4 * (w / 400)));
+      for (let y=0; y<h; y+=step) {
+        for (let x=0; x<w; x+=step) {
+          let minD=Infinity, minD2=Infinity, nearest=0;
+          for (let i=0; i<pts.length; i++) {
+            const dx=x/w-pts[i].x, dy=y/h-pts[i].y, d=dx*dx+dy*dy;
+            if (d<minD) { minD2=minD; minD=d; nearest=i; } else if (d<minD2) { minD2=d; }
+          }
+          const c=pts[nearest].c;
+          const light = 0.4+0.25*Math.sin(t*0.3+nearest*0.8);
+          ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${light})`;
+          ctx.fillRect(x,y,step,step);
+          if (minD2-minD < 0.003) {
+            ctx.fillStyle = `rgba(200,170,80,${0.6+0.2*Math.sin(t*0.5)})`;
+            ctx.fillRect(x,y,step,step);
+          }
+        }
+      }
+      const lx=w*(0.5+0.15*Math.sin(t*0.15)), ly=h*0.35;
+      const lg=ctx.createRadialGradient(lx,ly,0,lx,ly,w*0.4);
+      lg.addColorStop(0,'rgba(255,255,200,0.1)'); lg.addColorStop(1,'rgba(255,255,200,0)');
+      ctx.fillStyle = lg; ctx.fillRect(0,0,w,h);
+    }
+  },
+  {
+    name: 'Marble Gold',
+    bg: 'linear-gradient(160deg, #f5f0ec 0%, #ede5dd 50%, #f5f0ec 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      ctx.fillStyle = '#f5f0ec'; ctx.fillRect(0,0,w,h);
+      function sd(i) { return (Math.sin(i*127.1+42)*43758.5453)%1; }
+      // Grey veins
+      ctx.strokeStyle = 'rgba(180,175,170,0.15)'; ctx.lineWidth = 1.5;
+      for (let i=0; i<12; i++) {
+        ctx.beginPath();
+        let vx=(i%4)*w/3-w*0.1, vy=Math.floor(i/4)*h/3;
+        ctx.moveTo(vx,vy);
+        for (let s=0; s<8; s++) { vx+=20+Math.sin(i*3+s*1.5)*30; vy+=15+Math.cos(i*2+s*2)*25; ctx.lineTo(vx,vy); }
+        ctx.stroke();
+      }
+      // Gold veins
+      for (let i=0; i<5; i++) {
+        ctx.beginPath();
+        let vx=Math.abs(sd(i))*w, vy=Math.abs(sd(i+10))*h*0.3;
+        ctx.moveTo(vx,vy);
+        for (let s=0; s<10; s++) { vx+=15+Math.sin(i*5+s*1.3)*25; vy+=20+Math.cos(i*3+s*1.7)*15; ctx.lineTo(vx,vy); }
+        const a = 0.25+0.1*Math.sin(t*0.3+i*2);
+        ctx.strokeStyle = `rgba(200,170,80,${a})`; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = `rgba(240,220,140,${a*0.4})`; ctx.lineWidth = 4; ctx.stroke();
+        ctx.lineWidth = 2;
+      }
+      // Sheen
+      const sh = ctx.createLinearGradient(0,0,w,h);
+      sh.addColorStop(0,'rgba(255,255,255,0)');
+      sh.addColorStop(0.4+0.1*Math.sin(t*0.2),`rgba(255,255,255,${0.06+0.03*Math.sin(t*0.4)})`);
+      sh.addColorStop(0.6,'rgba(255,255,255,0)'); sh.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle = sh; ctx.fillRect(0,0,w,h);
+    }
+  },
+  {
+    name: 'Aurora Sky',
+    bg: 'linear-gradient(180deg, #050510 0%, #0a0a25 30%, #0d1520 60%, #080812 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      const bg = ctx.createLinearGradient(0,0,0,h);
+      bg.addColorStop(0,'#050510'); bg.addColorStop(0.3,'#0a0a25');
+      bg.addColorStop(0.6,'#0d1520'); bg.addColorStop(1,'#080812');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+      const bands = [
+        {y:.25,c:[50,220,120],sp:.12},{y:.35,c:[30,180,200],sp:.1},
+        {y:.3,c:[100,60,220],sp:.08},{y:.2,c:[50,255,150],sp:.15},
+      ];
+      for (const b of bands) {
+        ctx.beginPath(); ctx.moveTo(0,h);
+        for (let x=0; x<=w; x+=3) {
+          const wave = Math.sin(x*0.01+t*0.4+b.y*10)*h*0.08 + Math.sin(x*0.005+t*0.2+b.c[0]*0.1)*h*0.05;
+          ctx.lineTo(x, b.y*h+wave);
+        }
+        ctx.lineTo(w,h); ctx.closePath();
+        const ag = ctx.createLinearGradient(0,(b.y-b.sp)*h,0,(b.y+b.sp)*h);
+        const a = 0.08+0.04*Math.sin(t*0.3+b.y*5);
+        ag.addColorStop(0,`rgba(${b.c},0)`); ag.addColorStop(0.3,`rgba(${b.c},${a})`);
+        ag.addColorStop(0.7,`rgba(${b.c},${a*0.5})`); ag.addColorStop(1,`rgba(${b.c},0)`);
+        ctx.fillStyle = ag; ctx.fill();
+      }
+      function sr(i) { let x=Math.sin(i*127.1+42)*43758.5453; return x-Math.floor(x); }
+      for (let i=0; i<80; i++) {
+        const sx=sr(i)*w, sy=sr(i+1000)*h*0.6, sz=0.3+sr(i+2000)*0.8;
+        const tw=0.3+0.5*(0.5+0.5*Math.sin(t+i*1.7));
+        ctx.fillStyle=`rgba(255,255,255,${tw})`; ctx.beginPath(); ctx.arc(sx,sy,sz,0,Math.PI*2); ctx.fill();
+      }
+    }
+  },
+  {
+    name: 'Ocean Depth',
+    bg: 'linear-gradient(180deg, #0a2540 0%, #0d3050 30%, #082838 60%, #041620 100%)',
+    decor: [],
+    canvasDraw(ctx, w, h, t) {
+      const bg = ctx.createLinearGradient(0,0,0,h);
+      bg.addColorStop(0,'#0a2540'); bg.addColorStop(0.3,'#0d3050');
+      bg.addColorStop(0.6,'#082838'); bg.addColorStop(1,'#041620');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+      for (let i=0; i<5; i++) {
+        const rx=w*(0.15+i*0.18)+Math.sin(t*0.2+i)*15;
+        ctx.save(); ctx.translate(rx,0);
+        const sp=20+i*5;
+        ctx.beginPath(); ctx.moveTo(-sp*0.3,0); ctx.lineTo(-sp*1.5,h); ctx.lineTo(sp*1.5,h); ctx.lineTo(sp*0.3,0); ctx.closePath();
+        const rg=ctx.createLinearGradient(0,0,0,h);
+        const a=0.03+0.02*Math.sin(t*0.3+i*1.5);
+        rg.addColorStop(0,`rgba(100,200,255,${a*2})`); rg.addColorStop(0.5,`rgba(50,150,200,${a})`); rg.addColorStop(1,'rgba(20,80,120,0)');
+        ctx.fillStyle=rg; ctx.fill(); ctx.restore();
+      }
+      function sr(i) { let x=Math.sin(i*127.1+42)*43758.5453; return Math.abs(x-Math.floor(x)); }
+      for (let i=0; i<20; i++) {
+        const cx=sr(i)*w, cy=sr(i+500)*h, cr=10+sr(i+1000)*25;
+        const a=0.02+0.02*Math.sin(t*0.8+i*2.3);
+        const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,cr);
+        cg.addColorStop(0,`rgba(120,220,255,${a})`); cg.addColorStop(1,'rgba(120,220,255,0)');
+        ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+      }
+      for (let i=0; i<15; i++) {
+        const px=sr(i+100)*w, py=(sr(i+200)*h+Math.sin(t*0.5+i)*10)%h;
+        ctx.fillStyle=`rgba(150,220,255,${0.15+0.1*Math.sin(t+i*1.5)})`;
+        ctx.beginPath(); ctx.arc(px,py,1.5,0,Math.PI*2); ctx.fill();
+      }
+    }
+  },
 ];
 
 function getDailyThemeIndex() {
@@ -302,8 +558,44 @@ function applyPhotoBg(dataUrl) {
   const css = `url(${dataUrl}) center/cover no-repeat`;
   bgEl.style.background = css;
   appBg.style.background = css;
-  // Clear decorative elements
   bgEl.querySelectorAll('.theme-decor').forEach(el => el.remove());
+}
+
+// --- Animated background controller ---
+let _animBgRaf = 0;
+let _animBgDraw = null;
+
+function stopAnimatedBg() {
+  if (_animBgRaf) { cancelAnimationFrame(_animBgRaf); _animBgRaf = 0; }
+  _animBgDraw = null;
+  const c = document.getElementById('animated-bg');
+  if (c) c.style.display = 'none';
+}
+
+function startAnimatedBg(drawFn) {
+  stopAnimatedBg();
+  const canvas = document.getElementById('animated-bg');
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  _animBgDraw = drawFn;
+  const t0 = performance.now();
+  function loop() {
+    if (_animBgDraw !== drawFn) return; // stopped or replaced
+    const t = (performance.now() - t0) / 1000;
+    drawFn(ctx, canvas.width, canvas.height, t);
+    _animBgRaf = requestAnimationFrame(loop);
+  }
+  _animBgRaf = requestAnimationFrame(loop);
 }
 
 function applyTheme(index) {
@@ -312,12 +604,22 @@ function applyTheme(index) {
   if (mode === 'photo') {
     const photo = localStorage.getItem(STORAGE_KEY_PHOTO);
     if (photo) {
+      stopAnimatedBg();
       applyPhotoBg(photo);
       document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
       return;
     }
   }
-  renderThemeBg(index);
+
+  const theme = themes[index];
+  if (theme && theme.canvasDraw) {
+    // Animated canvas background
+    renderThemeBg(index); // set fallback CSS gradient
+    startAnimatedBg(theme.canvasDraw);
+  } else {
+    stopAnimatedBg();
+    renderThemeBg(index);
+  }
   document.querySelectorAll('.theme-swatch').forEach((s, i) => {
     s.classList.toggle('active', i === index);
   });
