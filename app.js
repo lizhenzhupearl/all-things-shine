@@ -1107,11 +1107,11 @@ renderJournal();
     gems.push({
       x: Math.random() * w,
       y: Math.random() * h,
-      size: (10 + Math.random() * 12) * dpr,
-      dx: (Math.random() - 0.5) * 0.55,
-      dy: -0.3 - Math.random() * 0.45,
+      size: (14 + Math.random() * 16) * dpr,
+      dx: (Math.random() - 0.5) * 1.5,
+      dy: -0.8 - Math.random() * 1.2,
       rot: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.01,
+      rotSpeed: (Math.random() - 0.5) * 0.02,
       phase: Math.random() * Math.PI * 2,
       twinkleSpeed: 0.025 + Math.random() * 0.035,
       color: gemColors[Math.floor(Math.random() * gemColors.length)],
@@ -1249,13 +1249,13 @@ renderJournal();
     ctx.save();
     ctx.translate(g.x, g.y);
     ctx.rotate(g.rot);
-    ctx.globalAlpha = 0.4 + 0.2 * Math.sin(phase * 0.7);
+    ctx.globalAlpha = 0.75 + 0.25 * Math.sin(phase * 0.7);
 
     // Outer glow
     const glowR = s * 2;
     const glow = ctx.createRadialGradient(0, 0, s * 0.4, 0, 0, glowR);
-    glow.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.15)`);
-    glow.addColorStop(0.5, `rgba(${hr},${hg},${hb}, 0.04)`);
+    glow.addColorStop(0, `rgba(${hr},${hg},${hb}, 0.4)`);
+    glow.addColorStop(0.5, `rgba(${hr},${hg},${hb}, 0.12)`);
     glow.addColorStop(1, `rgba(${hr},${hg},${hb}, 0)`);
     ctx.fillStyle = glow;
     ctx.beginPath();

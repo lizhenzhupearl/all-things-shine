@@ -1,5 +1,5 @@
 // Service Worker for offline support
-const CACHE_NAME = 'all-things-shine-v8';
+const CACHE_NAME = 'all-things-shine-v9';
 const ASSETS = [
   './',
   './index.html',
